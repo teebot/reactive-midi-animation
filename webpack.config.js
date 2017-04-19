@@ -9,9 +9,6 @@ module.exports = {
     module: {
         rules: [
             { test: /\.tsx?$/, loader: 'ts-loader' }
-        ],
-        loaders: [
-            { test: /\.(jpe?g|gif|png|svg|woff|ttf|wav|mp3)$/, loader: "file-loader" }
         ]
     }
 }
