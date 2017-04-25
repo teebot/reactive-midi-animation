@@ -21,21 +21,8 @@ export const keyboard$: Observable<Array<MIDINote>> = Observable
     .distinctUntilChanged()
     .startWith([]);
 
-function pushedKeysToMIDINote(pushedKeys: Array<string>): Array<MIDINote> {
-    return pushedKeys.map(k => {
-        const mapped = keyboardMapping[k.toLowerCase()];
-        if (mapped) {
-            return {
-                onOff: 'on',
-                inputId: 'keyboard',
-                note: {key: mapped, octave: 1},
-                velocity: 64,
-            }
-        }
-    });
-}
 
-const keyboardMapping = {
+const KEYBOARD_MAPPING = {
     a: 'C',
     w: 'C#',
     s: 'D',
@@ -54,3 +41,18 @@ const keyboardMapping = {
     p: 'D#',
     m: 'E'
 };
+const VALID_KEYBOARD_KEYS = Object.keys(KEYBOARD_MAPPING);
+
+function pushedKeysToMIDINote(pushedKeys: Array<string>): Array<MIDINote> {
+    return pushedKeys.filter(k => VALID_KEYBOARD_KEYS.indexOf(k) !== -1).map(k => {
+        const mapped = KEYBOARD_MAPPING[k.toLowerCase()];
+        if (mapped) {
+            return {
+                onOff: 'on',
+                inputId: 'keyboard',
+                note: {key: mapped, octave: 1},
+                velocity: 64,
+            }
+        }
+    });
+}
