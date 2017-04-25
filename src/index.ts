@@ -34,10 +34,18 @@ gameLoop$.subscribe((gameState: GameState) => {
 });
 
 function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: any) {
+    const keyColors = {
+        'C': 0x9966FF,
+        'D': 0xFF0000,
+        'E': 0x00FF00,
+        'F': 0x0000FF,
+    };
     if (midiNotes.length) {
         state.circleX += ticker.deltaTime * 100;
+        state.color = keyColors[midiNotes[0].note.key] || 0x9966FF
     } else {
         state.circleX = 64;
+        state.color = 0x9966FF;
     }
     return state;
 }

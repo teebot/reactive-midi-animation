@@ -1,7 +1,9 @@
 export type GameState = {
-    circleX: number
+    circleX: number,
+    color: number
 };
 
 export const defaultGameState: GameState = {
-    circleX: 64
+    circleX: 64,
+    color: 0x9966FF
 };
