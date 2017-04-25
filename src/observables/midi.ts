@@ -1,8 +1,8 @@
-import {Observable} from "rxjs";
+import {Observable} from 'rxjs';
 import MIDIInput = WebMidi.MIDIInput;
 import MIDIMessageEvent = WebMidi.MIDIMessageEvent;
-import {MIDINote} from "../types/midiNote";
-import {areNotesEqual, midiMessageMapper} from "../utils/midiMapper";
+import {MIDINote} from '../types/midiNote';
+import {areNotesEqual, midiMessageMapper} from '../utils/midiMapper';
 import MIDIAccess = WebMidi.MIDIAccess;
 
 const fakeKeyboardMIDIInput = {

@@ -1,5 +1,5 @@
-import {Observable} from "rxjs";
-import {MIDINote} from "../types/midiNote";
+import {Observable} from 'rxjs';
+import {MIDINote} from '../types/midiNote';
 
 /**
  * Simulates a MIDI instrument by emitting MIDINotes
