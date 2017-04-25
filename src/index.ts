@@ -4,6 +4,7 @@ import {Renderer} from "./renderer";
 import {keyboard$} from "./observables/keyboard";
 import {midiInputs$, midiInputTriggers$} from "./observables/midi";
 import {MIDINote} from "./types/midiNote";
+import MIDIInput = WebMidi.MIDIInput;
 
 const TICKER_INTERVAL = 17;
 const ticker$ = Observable
@@ -19,7 +20,6 @@ const ticker$ = Observable
         })
     );
 
-midiInputs$.subscribe(i => console.log(i.name));
 const midi$ = Observable.merge(keyboard$, midiInputTriggers$);
 
 const gameLoop$ = ticker$.combineLatest(midi$)
@@ -29,8 +29,15 @@ const gameLoop$ = ticker$.combineLatest(midi$)
 
 Renderer.Instance.init();
 
+// Gameloop
 gameLoop$.subscribe((gameState: GameState) => {
     Renderer.Instance.render(gameState);
+});
+
+// Print midi inputs
+midiInputs$.subscribe((inputs: Array<MIDIInput>) => {
+    const element = document.querySelector('.input-names');
+    element.textContent = inputs.map(i => i.name).join('/');
 });
 
 function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: any) {

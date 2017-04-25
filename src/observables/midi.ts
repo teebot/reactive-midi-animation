@@ -3,16 +3,21 @@ import MIDIInput = WebMidi.MIDIInput;
 import MIDIMessageEvent = WebMidi.MIDIMessageEvent;
 import {MIDINote} from "../types/midiNote";
 import {areNotesEqual, midiMessageMapper} from "../utils/midiMapper";
+import MIDIAccess = WebMidi.MIDIAccess;
 
 export const midiInputs$ = Observable.fromPromise(navigator.requestMIDIAccess())
-    .map(midi => midi.inputs.values().next().value)
-    .filter(x => !!x);
+    .map((midi: MIDIAccess) =>
+        Array.from(midi.inputs).map(([id, input]) => input)
+    )
+    .filter(x => !!x && x.length > 0);
 
 let pushedNotes: Array<MIDINote> = [];
 export const midiInputTriggers$: Observable<Array<MIDINote>> = midiInputs$
-    .flatMap(i =>
+    .flatMap(inputs =>
         Observable.create((observer) => {
-            i.onmidimessage = (event) => observer.next(event);
+            inputs.forEach(i => {
+                i.onmidimessage = (event) => observer.next(event);
+            })
         })
     )
     .filter((midiMessage: MIDIMessageEvent) =>
