@@ -1,9 +1,9 @@
-import {Observable, Scheduler} from "rxjs";
-import {defaultGameState, GameState} from "./types/gameState";
-import {Renderer} from "./renderer";
-import {keyboard$} from "./observables/keyboard";
-import {midiInputs$, midiInputTriggers$} from "./observables/midi";
-import {MIDINote} from "./types/midiNote";
+import {Observable, Scheduler} from 'rxjs';
+import {defaultGameState, GameState} from './types/gameState';
+import {Renderer} from './renderer';
+import {keyboard$} from './observables/keyboard';
+import {midiInputs$, midiInputTriggers$} from './observables/midi';
+import {MIDINote} from './types/midiNote';
 import MIDIInput = WebMidi.MIDIInput;
 
 const TICKER_INTERVAL = 17;

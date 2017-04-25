@@ -1,5 +1,5 @@
 import {range, flatMap} from 'lodash';
-import {MIDINote} from "../types/midiNote";
+import {MIDINote} from '../types/midiNote';
 import MIDIMessageEvent = WebMidi.MIDIMessageEvent;
 
 const KEYS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];

@@ -1,5 +1,5 @@
 import {Graphics, Application} from 'pixi.js';
-import {GameState} from "./types/gameState";
+import {GameState} from './types/gameState';
 export class Renderer {
     private static _renderer: Renderer;
 
