@@ -1,8 +1,13 @@
 import {Observable} from "rxjs";
 import {MIDINote} from "../types/midiNote";
 
+/**
+ * Simulates a MIDI instrument by emitting MIDINotes
+ * mapped to keyboard keys
+ * @type Observable<Array<MIDINote>>
+ */
 let pushedKeys: string[] = [];
-export const keyboard$: Observable<Array<MIDINote>> = Observable
+export const keyboard$ = Observable
     .merge(
         Observable.fromEvent(document, 'keydown'),
         Observable.fromEvent(document, 'keyup')

@@ -5,14 +5,23 @@ import {MIDINote} from "../types/midiNote";
 import {areNotesEqual, midiMessageMapper} from "../utils/midiMapper";
 import MIDIAccess = WebMidi.MIDIAccess;
 
+/**
+ * Emits all midi inputs available
+ * @type Observable<Array<MIDIInput>>
+ */
 export const midiInputs$ = Observable.fromPromise(navigator.requestMIDIAccess())
     .map((midi: MIDIAccess) =>
         Array.from(midi.inputs).map(([id, input]) => input)
     )
     .filter(x => !!x && x.length > 0);
 
+/**
+ * Emits whenever one of the MIDI instruments plays a note
+ * Only pushed notes are emitted
+ * @type Observable<Array<MIDINote>>
+ */
 let pushedNotes: Array<MIDINote> = [];
-export const midiInputTriggers$: Observable<Array<MIDINote>> = midiInputs$
+export const midiInputTriggers$ = midiInputs$
     .flatMap(inputs =>
         Observable.create((observer) => {
             inputs.forEach(i => {
