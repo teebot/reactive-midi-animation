@@ -1,6 +1,6 @@
 import {Observable, Scheduler} from 'rxjs';
 import {defaultGameState, GameState} from './types/gameState';
-import {Renderer} from './renderer';
+import {render} from './renderer';
 import {keyboard$} from './observables/keyboard';
 import {midiInputs$, midiInputTriggers$} from './observables/midi';
 import {MIDINote} from './types/midiNote';
@@ -27,11 +27,9 @@ const gameLoop$ = ticker$.combineLatest(midi$)
             mutateGameState(midiNotes, state, ticker)
         , defaultGameState);
 
-Renderer.Instance.init();
-
 // Gameloop
 gameLoop$.subscribe((gameState: GameState) => {
-    Renderer.Instance.render(gameState);
+    render(gameState);
 });
 
 // Print midi inputs
