@@ -5,15 +5,21 @@ import {MIDINote} from "../types/midiNote";
 import {areNotesEqual, midiMessageMapper} from "../utils/midiMapper";
 import MIDIAccess = WebMidi.MIDIAccess;
 
+const fakeKeyboardMIDIInput = {
+    name: 'keyboard',
+    id: '0',
+    onmidimessage: null
+};
+
 /**
  * Emits all midi inputs available
  * @type Observable<Array<MIDIInput>>
  */
 export const midiInputs$ = Observable.fromPromise(navigator.requestMIDIAccess())
-    .map((midi: MIDIAccess) =>
-        Array.from(midi.inputs).map(([id, input]) => input)
-    )
-    .filter(x => !!x && x.length > 0);
+    .map((midi: MIDIAccess) => {
+        const midiInputs = Array.from(midi.inputs).map(([id, input]) => input);
+        return [fakeKeyboardMIDIInput, ...midiInputs];
+    });
 
 /**
  * Emits whenever one of the MIDI instruments plays a note

@@ -40,7 +40,7 @@ midiInputs$.subscribe((inputs: Array<MIDIInput>) => {
     element.textContent = inputs.map(i => i.name).join('/');
 });
 
-function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: any) {
+function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: any): GameState {
     const keyColors = {
         'C': 0x9966FF,
         'D': 0xFF0000,
