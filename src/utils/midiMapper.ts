@@ -20,7 +20,7 @@ export function midiMessageMapper(midiMessage: MIDIMessageEvent): MIDINote {
     return {
         onOff: origin >= 144 && origin <= 159 ? 'on' : 'off',
         inputId: midiMessage.srcElement.id,
-        note: midiNotes[key],
+        note: {...midiNotes[key], id: key},
         velocity
     }
 }

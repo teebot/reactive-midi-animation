@@ -20,6 +20,18 @@ const ticker$ = Observable
         })
     );
 
+// Testing audio output from keyboard
+let context = new AudioContext();
+const vco = context.createOscillator();
+vco.type = 'sine';
+vco.frequency.value = 1000;
+vco.start(0);
+let vca = context.createGain();
+vca.gain.value = 0;
+vco.connect(vca);
+vca.connect(context.destination);
+
+
 const midi$ = Observable.merge(keyboard$, midiInputTriggers$);
 
 const gameLoop$ = ticker$.combineLatest(midi$)
@@ -35,7 +47,7 @@ gameLoop$.subscribe((gameState: GameState) => {
 // Print midi inputs
 midiInputs$.subscribe((inputs: Array<MIDIInput>) => {
     const element = document.querySelector('.input-names');
-    element.textContent = inputs.map(i => i.name).join('/');
+    element.textContent = inputs.map(i => i.name).join(', ');
 });
 
 function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: any): GameState {
@@ -46,11 +58,21 @@ function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: a
         'F': 0x0000FF,
     };
     if (midiNotes.length) {
+        for (let noteObj of midiNotes) {
+            if (noteObj.inputId === "keyboard") {
+                console.log(noteObj.note);
+                vco.frequency.value = Math.pow(2, (noteObj.note.id + 40 - 69) / 12) * 440;
+                vca.gain.value = 1;
+                break;
+            }
+        }
         state.circleX += ticker.deltaTime * 100;
         state.color = keyColors[midiNotes[0].note.key] || 0x9966FF
     } else {
         state.circleX = 64;
         state.color = 0x9966FF;
+        vca.gain.value = 0;
     }
+
     return state;
 }
