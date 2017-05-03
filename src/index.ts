@@ -1,6 +1,6 @@
 import {Observable, Scheduler} from 'rxjs';
 import {defaultGameState, GameState} from './types/gameState';
-import {render} from './renderer';
+import {Renderer} from './renderer';
 import {keyboard$} from './observables/keyboard';
 import {midiInputs$, midiInputTriggers$} from './observables/midi';
 import {MIDINote} from './types/midiNote';
@@ -27,9 +27,11 @@ const gameLoop$ = ticker$.combineLatest(midi$)
             mutateGameState(midiNotes, state, ticker)
         , defaultGameState);
 
+const renderer = new Renderer(defaultGameState, document.body);
+
 // Gameloop
 gameLoop$.subscribe((gameState: GameState) => {
-    render(gameState);
+    renderer.render(gameState);
 });
 
 // Print midi inputs
@@ -47,10 +49,20 @@ function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: a
     };
     if (midiNotes.length) {
         state.circleX += ticker.deltaTime * 100;
-        state.color = keyColors[midiNotes[0].note.key] || 0x9966FF
+        state.color = keyColors[midiNotes[0].note.key] || 0x9966FF;
+        state.lines.forEach((line, index) => {
+            if (index + 1 <= midiNotes.length) {
+                state.lines[index].on = true;
+            } else {
+                state.lines[index].on = false;
+            }
+        });
     } else {
         state.circleX = 64;
         state.color = 0x9966FF;
+        state.lines.forEach((line, index) => {
+            state.lines[index].on = false;
+        });
     }
     return state;
 }
