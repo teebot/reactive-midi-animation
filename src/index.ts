@@ -5,7 +5,6 @@ import {keyboard$} from './observables/keyboard';
 import {midiInputs$, midiInputTriggers$} from './observables/midi';
 import {MIDINote} from './types/midiNote';
 import MIDIInput = WebMidi.MIDIInput;
-import {animateLaser, stopLaser} from "./types/laser";
 
 const TICKER_INTERVAL = 17;
 const ticker$ = Observable
@@ -42,37 +41,27 @@ midiInputs$.subscribe((inputs: Array<MIDIInput>) => {
 });
 
 function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: any): GameState {
-    const keyColors = {
-        'C': 0x9966FF,
-        'D': 0xFF0000,
-        'E': 0x00FF00,
-        'F': 0x0000FF,
-    };
-    if (midiNotes.length) {
-        state.circleX += ticker.deltaTime * 100;
-        state.color = keyColors[midiNotes[0].note.key] || 0x9966FF;
+    // TODO: Map keys to lasers and store which ones are on in an array or stream?
+    // TODO: Bring back the ticker (from the circle example) + check that example to see how we map keys!
 
+    if (midiNotes.length) {
         state.lasers.forEach((item, index) => {
             if (index + 1 <= midiNotes.length) {
+                // TODO: Remove this once we have solved previous todo
                 // Start or continue animation
-                animateLaser(item, index);
+                item.animate(index);
 
             } else {
                 // Decay
                 if (item.visible) {
-                    stopLaser(item, index);
+                    // TODO: Remove this once we have solved previous todo
+                    item.stop(index);
                 }
             }
         });
     } else {
-        state.circleX = 64;
-        state.color = 0x9966FF;
-        state.lasers.forEach((item, index) => {
-            // Decay all
-            if (item.visible) {
-                stopLaser(item, index);
-            }
-        });
+        // Kill all visible lasers
+        state.lasers.filter(laser => laser.visible).forEach((item, index) => item.stop(index));
     }
     return state;
 }

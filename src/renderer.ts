@@ -8,7 +8,6 @@ import {GameState} from './types/gameState';
  */
 export class Renderer {
     defaultGameState: GameState;
-    circle: Graphics;
     app: Application;
     lasers: Array<Array<Graphics>>;
 
@@ -22,15 +21,7 @@ export class Renderer {
     }
 
     init(): void {
-        // Temporary (TODO remove)
-        this.circle = new Graphics();
-        this.circle.alpha = 0;
-        this.circle.beginFill(0x9966FF);
-        this.circle.drawCircle(0, 0, 32);
-        this.circle.endFill();
-        this.circle.x = 64;
-        this.circle.y = 130;
-        this.app.stage.addChild(this.circle);
+        // TODO: Refactor (move logic about lasers inside laser class, make this generic?)
 
         // Draw lines (based on default gamestate)
         this.defaultGameState.lasers.forEach(item => {
@@ -54,19 +45,12 @@ export class Renderer {
     }
 
     render(gameState: GameState): void {
-        // Apply game state to graphics
-        this.circle.x = gameState.circleX;
-        if (gameState.circleX > 64) {
-            this.circle.alpha = 1;
-            this.circle.tint = gameState.color;
-        } else {
-            this.circle.alpha = 0;
-        }
+        // TODO: Refactor (move logic about lasers inside laser class, make this generic?)
 
-        // Lines
+        // Apply game state to lasers
         gameState.lasers.forEach((item, index) => {
             this.lasers[index][0].alpha = item.visible ? item.opacity : 0; // backLine
-            this.lasers[index][0].filters[0]["blur"] = item.glow;     // backLine
+            this.lasers[index][0].filters[0]["blur"] = item.glow; // backLine
             this.lasers[index][1].alpha = item.visible ? item.opacity : 0; // frontLine
         });
     }
