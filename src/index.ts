@@ -5,6 +5,7 @@ import {keyboard$} from './observables/keyboard';
 import {midiInputs$, midiInputTriggers$} from './observables/midi';
 import {MIDINote} from './types/midiNote';
 import MIDIInput = WebMidi.MIDIInput;
+import {animateLaser, stopLaser} from "./types/laser";
 
 const TICKER_INTERVAL = 17;
 const ticker$ = Observable
@@ -21,9 +22,6 @@ const ticker$ = Observable
     );
 
 const midi$ = Observable.merge(keyboard$, midiInputTriggers$);
-
-// defaultGameState object will mutate, so we keep a copy here to restore default values when needed
-const defaultGameStateClone = JSON.parse(JSON.stringify(defaultGameState));
 
 const gameLoop$ = ticker$.combineLatest(midi$)
     .scan((state: GameState, [ticker, midiNotes]) =>
@@ -56,57 +54,26 @@ function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: a
 
         state.lasers.forEach((item, index) => {
             if (index + 1 <= midiNotes.length) {
-                // Set appearedAt to NOW if key is down, and is currently decaying (bring back to life)
-                if (state.lasers[index].decaying) {
-                    state.lasers[index].decaying = false;
-                    state.lasers[index].appearedAt = Date.now();
-                    state.lasers[index].opacity = defaultGameStateClone.lasers[index].opacity;
-                }
-
-                // Make visible
-                state.lasers[index].visible = true;
-                const defaultGlow = defaultGameStateClone.lasers[index].glow;
-                const glowLevel = Math.round((Math.sin(Date.now() / 100) + 1) * defaultGlow);
-                state.lasers[index].glow = glowLevel + 2;
-                state.lasers[index].keyDown = true;
-
-                // Set appearedAt to NOW if not set
-                if (!state.lasers[index].appearedAt || state.lasers[index].appearedAt < 1) {
-                    state.lasers[index].appearedAt = Date.now();
-                }
+                // Start or continue animation
+                animateLaser(item, index);
 
             } else {
-                killOverTime(state.lasers[index], defaultGameStateClone.lasers[index]);
+                // Decay
+                if (item.visible) {
+                    stopLaser(item, index);
+                }
             }
         });
     } else {
         state.circleX = 64;
         state.color = 0x9966FF;
         state.lasers.forEach((item, index) => {
-            // Turn them off
-            if (state.lasers[index].visible) {
-                killOverTime(state.lasers[index], defaultGameStateClone.lasers[index]);
+            // Decay all
+            if (item.visible) {
+                stopLaser(item, index);
             }
         });
     }
     return state;
 }
 
-function killOverTime(item, defaultItem) {
-    item.keyDown = false;
-
-    // Decay animation
-    if (item.decayFor > 0 && item.visible && Date.now() <= item.appearedAt + item.decayFor) {
-        item.decaying = true;
-        item.opacity = 1 - ((Date.now() - item.appearedAt) / item.decayFor);
-    }
-
-    // Reset item values if no decay OR item has finished decaying
-    if (item.visible && (!item.decayFor || item.decayFor <= 0 || Date.now() > item.appearedAt + item.decayFor)) {
-        item.glow = defaultItem.glow;
-        item.opacity = defaultItem.opacity;
-        item.visible = false;
-        item.appearedAt = 0;
-        item.decaying = false;
-    }
-}
