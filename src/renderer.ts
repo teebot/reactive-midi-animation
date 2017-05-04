@@ -1,22 +1,22 @@
-import {Graphics, Application} from 'pixi.js';
+import {Graphics, Application, filters} from 'pixi.js';
 import {GameState} from './types/gameState';
 
 /**
- * This class initialises all possible graphics based on the default game state
+ * This class initialises all possible graphics based visible the default game state
  * And implements a render routine which will take the current game state and apply all
- * properties to objects on screen
+ * properties to objects visible screen
  */
 export class Renderer {
     defaultGameState: GameState;
     circle: Graphics;
     app: Application;
-    lines: Array<Graphics>;
+    lasers: Array<Array<Graphics>>;
 
     constructor(defaultGameState, domElement) {
         // Initialise PixiJS application
         this.defaultGameState = defaultGameState;
         this.app = new Application(800, 600, {backgroundColor: 0x000000});
-        this.lines = [];
+        this.lasers = [];
         domElement.appendChild(this.app.view);
         this.init();
     }
@@ -32,14 +32,24 @@ export class Renderer {
         this.circle.y = 130;
         this.app.stage.addChild(this.circle);
 
-        // Initialise lines (based on default gamestate)
-        this.defaultGameState.lines.forEach(line => {
-            let newLine = new Graphics();
-            newLine.lineStyle(4, line.color, line.opacity);
-            newLine.moveTo(line.x1, line.y1);
-            newLine.lineTo(line.x2, line.y2);
-            this.lines.push(newLine);
-            this.app.stage.addChild(this.lines[this.lines.length - 1]);
+        // Draw lines (based on default gamestate)
+        this.defaultGameState.lasers.forEach(item => {
+            const backLine = new Graphics();
+            backLine.lineStyle(4, item.color, item.opacity);
+            backLine.moveTo(item.x1, item.y1);
+            backLine.lineTo(item.x2, item.y2);
+            const dropShadowFilter = new filters.BlurFilter();
+            dropShadowFilter.blur = 6;
+            backLine.filters = [dropShadowFilter];
+
+            const frontLine = new Graphics();
+            frontLine.lineStyle(4, item.color, item.opacity);
+            frontLine.moveTo(item.x1, item.y1);
+            frontLine.lineTo(item.x2, item.y2);
+
+            this.lasers.push([backLine, frontLine]);
+            this.app.stage.addChild(this.lasers[this.lasers.length - 1][0]); // backLine
+            this.app.stage.addChild(this.lasers[this.lasers.length - 1][1]); // frontLine
         });
     }
 
@@ -54,8 +64,10 @@ export class Renderer {
         }
 
         // Lines
-        gameState.lines.forEach((line, index) => {
-            this.lines[index].alpha = line.on ? line.opacity : 0;
+        gameState.lasers.forEach((item, index) => {
+            this.lasers[index][0].alpha = item.visible ? item.opacity : 0; // backLine
+            this.lasers[index][0].filters[0]["blur"] = item.glow;     // backLine
+            this.lasers[index][1].alpha = item.visible ? item.opacity : 0; // frontLine
         });
     }
 }

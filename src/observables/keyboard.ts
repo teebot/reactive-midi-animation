@@ -53,7 +53,7 @@ function pushedKeysToMIDINote(pushedKeys: Array<string>): Array<MIDINote> {
         const mapped = KEYBOARD_MAPPING[k.toLowerCase()];
         if (mapped) {
             return {
-                onOff: 'on',
+                onOff: 'visible',
                 inputId: 'keyboard',
                 note: {key: mapped, octave: 1},
                 velocity: 64,
