@@ -34,34 +34,77 @@ gameLoop$.subscribe((gameState: GameState) => {
     renderer.render(gameState);
 });
 
-// Print midi inputs
+// Map graphics to MIDI inputs (e.g. lasers or boxes) TODO: Make this dynamic, so we can swap them on runtime
+const graphicsMidiInputMap = {};
+const unassignedGraphics = ['lasers', 'boringBoxes'];
+
+// Print midi inputs and assign to map
 midiInputs$.subscribe((inputs: Array<MIDIInput>) => {
     const element = document.querySelector('.input-names');
-    element.textContent = inputs.map(i => i.name).join('/');
+    element.textContent = inputs.map(i => i.name).join(', ');
+    inputs.forEach(input => {
+        if (unassignedGraphics.length) {
+            graphicsMidiInputMap[unassignedGraphics.pop()] = input.id; // e.g. lasers: 123901
+        }
+    });
 });
 
 function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: any): GameState {
-    // TODO: Map keys to lasers and store which ones are on in an array or stream?
-    // TODO: Bring back the ticker (from the circle example) + check that example to see how we map keys!
+    // TODO: Map keys to lasers and store which ones are on in an array or stream (using a map of keys: gfx objects)
 
     if (midiNotes.length) {
+        // Lasers
+        const laserNotes = midiNotes.filter(item => item.inputId === graphicsMidiInputMap['lasers']);
         state.lasers.forEach((item, index) => {
-            if (index + 1 <= midiNotes.length) {
-                // TODO: Remove this once we have solved previous todo
-                // Start or continue animation
+            if (index + 1 <= laserNotes.length) {
                 item.animate(index);
-
-            } else {
-                // Decay
-                if (item.visible) {
-                    // TODO: Remove this once we have solved previous todo
-                    item.stop(index);
-                }
+            } else if (item.isVisible) {
+                item.stop(index);
             }
         });
+
+        // Boring Boxes (note-independent, up to 3 visible at the same time)
+        const boringBoxNotes = midiNotes.filter(item => item.inputId === graphicsMidiInputMap['boringBoxes']);
+        state.boringBoxes.forEach((item, index) => {
+            if (index + 1 <= boringBoxNotes.length) {
+                item.animate(index);
+            } else if (item.isVisible) {
+                item.stop(index);
+            }
+        });
+
+        // TODO: Dealing with an issue right now when you press keys on both a midi input and the keyboard,
+        // the stream no longer contains one or the other and stops animating them
+        console.log(laserNotes.length, boringBoxNotes.length);
+
+        // TODO: I should be able to still call animate if key is still down, remember which ones are animating!
+        /*state.boringBoxes.forEach((item, index) => {
+            // Loop over notes being played
+            let animatingThisIndex = false;
+            boringBoxNotes.forEach(note => {
+                // If not currently animating this note
+                if (boringBoxNotes.length && !((note.note.key + note.note.octave) in animatingBoxNotes)) {
+                    // Add it to the list of things to start (or keep on) animating
+                    animatingBoxNotes[note.note.key + note.note.octave] = index;
+                    animatingThisIndex = true;
+                }
+            });
+
+            if (!animatingThisIndex && item.isVisible) {
+                item.stop(index);
+            }
+        });
+
+        Object.keys(animatingBoxNotes).forEach(key => {
+            const index = animatingBoxNotes[key];
+            state.boringBoxes[index].animate(index)
+
+        });*/
+
     } else {
-        // Kill all visible lasers
-        state.lasers.filter(laser => laser.visible).forEach((item, index) => item.stop(index));
+        // Initiate stop animation for all visible objects
+        state.lasers.filter(item => item.isVisible).forEach((item, index) => item.stop(index));
+        state.boringBoxes.filter(item => item.isVisible).forEach((item, index) => item.stop(index));
     }
     return state;
 }

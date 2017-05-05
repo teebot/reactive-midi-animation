@@ -1,4 +1,4 @@
-import {Graphics, Application, filters} from 'pixi.js';
+import {Graphics, Application} from 'pixi.js';
 import {GameState} from './types/gameState';
 
 /**
@@ -10,48 +10,52 @@ export class Renderer {
     defaultGameState: GameState;
     app: Application;
     lasers: Array<Array<Graphics>>;
+    boringBoxes: Array<Array<Graphics>>;
 
     constructor(defaultGameState, domElement) {
         // Initialise PixiJS application
         this.defaultGameState = defaultGameState;
         this.app = new Application(800, 600, {backgroundColor: 0x000000});
         this.lasers = [];
+        this.boringBoxes = [];
         domElement.appendChild(this.app.view);
         this.init();
     }
 
+    /**
+     * Draw all objects on screen based on the default game state:
+     * - Retrieve sets of objects, which consist of one or more items (e.g. lasers require back + front lines)
+     * - Store sets per category (e.g. lasers) so we can address them to apply state changes
+     * - (for example, this.lasers[0] = [backLaser, frontLaser] and both are of type "Graphics"
+     * - Stage all objects (by iterating over allSets we extract each object and draw it)
+     */
     init(): void {
-        // TODO: Refactor (move logic about lasers inside laser class, make this generic?)
-
-        // Draw lines (based on default gamestate)
+        // Lasers
         this.defaultGameState.lasers.forEach(item => {
-            const backLine = new Graphics();
-            backLine.lineStyle(4, item.color, item.opacity);
-            backLine.moveTo(item.x1, item.y1);
-            backLine.lineTo(item.x2, item.y2);
-            const dropShadowFilter = new filters.BlurFilter();
-            dropShadowFilter.blur = 6;
-            backLine.filters = [dropShadowFilter];
+            let objects = item.draw();
+            this.lasers.push(objects);
+        });
 
-            const frontLine = new Graphics();
-            frontLine.lineStyle(4, item.color, item.opacity);
-            frontLine.moveTo(item.x1, item.y1);
-            frontLine.lineTo(item.x2, item.y2);
+        // Boring Boxes
+        this.defaultGameState.boringBoxes.forEach(item => {
+            let objects = item.draw();
+            this.boringBoxes.push(objects);
+        });
 
-            this.lasers.push([backLine, frontLine]);
-            this.app.stage.addChild(this.lasers[this.lasers.length - 1][0]); // backLine
-            this.app.stage.addChild(this.lasers[this.lasers.length - 1][1]); // frontLine
+        // Combine all sets of objects
+        let allSets = [...this.lasers, ...this.boringBoxes];
+
+        // Draw all objects on screen
+        allSets.forEach(set => {
+            set.forEach(item => {
+                this.app.stage.addChild(item);
+            });
         });
     }
 
     render(gameState: GameState): void {
-        // TODO: Refactor (move logic about lasers inside laser class, make this generic?)
-
-        // Apply game state to lasers
-        gameState.lasers.forEach((item, index) => {
-            this.lasers[index][0].alpha = item.visible ? item.opacity : 0; // backLine
-            this.lasers[index][0].filters[0]["blur"] = item.glow; // backLine
-            this.lasers[index][1].alpha = item.visible ? item.opacity : 0; // frontLine
-        });
+        // Apply game state to all gfx objects
+        gameState.lasers.forEach((item, index) => item.applyStateToGraphics(this.lasers[index]));
+        gameState.boringBoxes.forEach((item, index) => item.applyStateToGraphics(this.boringBoxes[index]));
     }
 }
