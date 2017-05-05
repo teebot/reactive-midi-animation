@@ -40,7 +40,7 @@ export const midiInputTriggers$ = midiInputs$
     )
     .map((midiMessage: MIDIMessageEvent) => {
         const midiNote = midiMessageMapper(midiMessage);
-        if (midiNote.onOff === 'visible' && pushedNotes.indexOf(midiNote) === -1) {
+        if (midiNote.onOff === 'on' && pushedNotes.indexOf(midiNote) === -1) {
             pushedNotes = [midiNote, ...pushedNotes];
         } else if (midiNote.onOff === 'off') {
             pushedNotes = pushedNotes.filter(n => !areNotesEqual(n, midiNote));
