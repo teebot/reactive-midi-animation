@@ -1,3 +1,5 @@
+var CopyWebpackPlugin = require('copy-webpack-plugin');
+
 module.exports = {
     entry: './src/index.ts',
     output: {
@@ -10,5 +12,10 @@ module.exports = {
         rules: [
             { test: /\.tsx?$/, loader: 'ts-loader' }
         ]
-    }
-}
+    },
+    plugins: [
+        new CopyWebpackPlugin([
+            { from: 'src/soundfont', to: 'soundfont' }
+        ])
+    ]
+};

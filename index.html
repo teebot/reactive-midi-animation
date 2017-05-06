@@ -6,8 +6,47 @@
 
 <h1>🎹➡️🎆</h1>
 
-
 <div class="input-names"></div>
 
 <script src=out/main.js></script>
+
+<!-- --------------------- MIDI FILE LOADING EXPERIMENT START ------------------ -->
+<script src="../node_modules/midi.js/lib/midi.js"></script>
+<script type="text/javascript">
+    var midiReady = false;
+
+    window.MIDI.loadPlugin({
+        instrument: "acoustic_grand_piano", // or the instrument code 1 (aka the default)
+        //instruments: [ "acoustic_grand_piano", "acoustic_guitar_nylon" ], // or multiple instruments
+        onsuccess: function() { }
+    });
+
+    function loadMidi() {
+        var file = window['midiFile'];
+        window.MIDI.Player.loadFile(file, function() {
+            midiReady = true;
+            console.log('Callback: loadFile finished');
+        });
+    }
+
+    function playMidi() {
+        if (midiReady) {
+            window.MIDI.Player.start();
+            console.log('Callback: playMidi finished');
+        }
+    }
+
+    function stopMidi() {
+        if (MIDI.Player.playing) {
+            MIDI.Player.stop();
+            console.log('Callback: stopMidi finished');
+        }
+    }
+
+    window.MIDI.Player.addListener(function(data) {
+        window.postMessage(data.channel + '/' + data.message + '/' + data.note + '/' + data.velocity, "http://localhost:8080");
+    });
+</script>
+<!-- --------------------- MIDI FILE LOADING EXPERIMENT END ------------------ -->
+
 </html>
