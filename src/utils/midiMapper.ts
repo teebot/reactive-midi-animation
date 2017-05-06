@@ -17,8 +17,11 @@ const midiNotes = range(0, MIDI_IDS).map(i => possibleNotes[i]);
 export function midiMessageMapper(midiMessage: MIDIMessageEvent): MIDINote {
     const [origin, key, velocity] = midiMessage.data;
 
+    // Some MIDI keyboards don't output origin 128 for off, they still send 144 but with velocity 0
+    const onOff = (origin >= 144 && origin <= 159 && velocity > 0) ? 'on' : 'off';
+
     return {
-        onOff: origin >= 144 && origin <= 159 ? 'on' : 'off',
+        onOff: onOff,
         inputId: midiMessage.srcElement.id,
         note: midiNotes[key],
         velocity

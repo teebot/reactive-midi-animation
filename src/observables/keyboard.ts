@@ -54,7 +54,7 @@ function pushedKeysToMIDINote(pushedKeys: Array<string>): Array<MIDINote> {
         if (mapped) {
             return {
                 onOff: 'on',
-                inputId: 'keyboard',
+                inputId: '0',
                 note: {key: mapped, octave: 1},
                 velocity: 64,
             }

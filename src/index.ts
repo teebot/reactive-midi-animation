@@ -1,6 +1,6 @@
 import {Observable, Scheduler} from 'rxjs';
 import {defaultGameState, GameState} from './types/gameState';
-import {render} from './renderer';
+import {Renderer} from './renderer';
 import {keyboard$} from './observables/keyboard';
 import {midiInputs$, midiInputTriggers$} from './observables/midi';
 import {MIDINote} from './types/midiNote';
@@ -28,9 +28,11 @@ const gameLoop$ = ticker$.combineLatest(midi$)
             mutateGameState(midiNotes, state, ticker)
         , defaultGameState);
 
+const renderer = new Renderer(defaultGameState, document.querySelector('.graphics'));
+
 // Gameloop
 gameLoop$.subscribe((gameState: GameState) => {
-    render(gameState);
+    renderer.render(gameState);
 });
 
 // Add fullscreen support
@@ -52,14 +54,26 @@ fullScreenButton.addEventListener("click", fullscreen);
 const sidebar = document.querySelector('.sidebar');
 sidebar.appendChild(fullScreenButton);
 
-// Print midi inputs
+// Map graphics to MIDI inputs (e.g. lasers or boxes)
+const graphicsMidiInputMap = {};
+const unassignedGraphics = ['lasers', 'triangles', 'boringBoxes'];
+
+// Print midi inputs and assign to map
 midiInputs$.subscribe((inputs: Array<MIDIInput>) => {
-    inputs.forEach(item => {
+    // TODO: Check items aren't already in sidebar (or clear whole div on init)
+
+    inputs.forEach(input => {
+        let graphicToAssign;
+        if (unassignedGraphics.length) {
+            graphicToAssign = unassignedGraphics.pop();
+            graphicsMidiInputMap[graphicToAssign] = input.id; // e.g. lasers: 123901
+            // TODO: Use the one we just popped below as well (to pre-select the inputs in the dropdowns)
+        }
         let inputDiv = document.createElement('div');
         inputDiv.className = 'input';
         let inputTitle = document.createElement('div');
         inputTitle.className = 'title';
-        inputTitle.textContent = item.name;
+        inputTitle.textContent = input.name;
         let inputSelector = document.createElement('div');
         inputSelector.className = 'selector';
         let selectContainer = document.createDocumentFragment(),
@@ -70,24 +84,47 @@ midiInputs$.subscribe((inputs: Array<MIDIInput>) => {
         inputDiv.appendChild(inputTitle);
         inputDiv.appendChild(inputSelector);
         sidebar.appendChild(inputDiv);
-
-        // TODO: Check it doesn't already exist
     });
 });
 
 function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: any): GameState {
-    const keyColors = {
-        'C': 0x9966FF,
-        'D': 0xFF0000,
-        'E': 0x00FF00,
-        'F': 0x0000FF,
-    };
     if (midiNotes.length) {
-        state.circleX += ticker.deltaTime * 100;
-        state.color = keyColors[midiNotes[0].note.key] || 0x9966FF
+        // Lasers
+        const laserNotes = midiNotes.filter(item => item.inputId === graphicsMidiInputMap['lasers']);
+        state.lasers.forEach((item, index) => {
+            if (index + 1 <= laserNotes.length) {
+                item.animate(index);
+            } else if (item.isVisible) {
+                item.stop(index);
+            }
+        });
+
+        // Boring Boxes (note-independent, up to 3 visible at the same time)
+        const boringBoxNotes = midiNotes.filter(item => item.inputId === graphicsMidiInputMap['boringBoxes']);
+        state.boringBoxes.forEach((item, index) => {
+            if (index + 1 <= boringBoxNotes.length) {
+                item.animate(index);
+            } else if (item.isVisible) {
+                item.stop(index);
+            }
+        });
+
+        // Boring Boxes (note-independent, up to 3 visible at the same time)
+        const triangleNotes = midiNotes.filter(item => item.inputId === graphicsMidiInputMap['triangles']);
+        state.triangles.forEach((item, index) => {
+            if (index + 1 <= triangleNotes.length) {
+                item.animate(index);
+            } else if (item.isVisible) {
+                item.stop(index);
+            }
+        });
+
     } else {
-        state.circleX = 64;
-        state.color = 0x9966FF;
+        // Initiate stop animation for all visible objects
+        state.lasers.filter(item => item.isVisible).forEach((item, index) => item.stop(index));
+        state.boringBoxes.filter(item => item.isVisible).forEach((item, index) => item.stop(index));
+        state.triangles.filter(item => item.isVisible).forEach((item, index) => item.stop(index));
     }
     return state;
 }
+
