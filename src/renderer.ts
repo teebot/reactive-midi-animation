@@ -2,7 +2,7 @@ import {Graphics, Application} from 'pixi.js';
 import {GameState} from './types/gameState';
 
 const app = new Application(800, 600, {backgroundColor: 0x000000});
-document.body.appendChild(app.view);
+document.body.querySelector('.graphics').appendChild(app.view);
 
 let circle: Graphics;
 init();
