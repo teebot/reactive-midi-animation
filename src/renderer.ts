@@ -11,6 +11,7 @@ export class Renderer {
     app: Application;
     lasers: Array<Array<Graphics>>;
     boringBoxes: Array<Array<Graphics>>;
+    triangles: Array<Array<Graphics>>;
 
     constructor(defaultGameState, domElement) {
         // Initialise PixiJS application
@@ -18,6 +19,7 @@ export class Renderer {
         this.app = new Application(800, 600, {backgroundColor: 0x000000});
         this.lasers = [];
         this.boringBoxes = [];
+        this.triangles = [];
         domElement.appendChild(this.app.view);
         this.init();
     }
@@ -42,8 +44,14 @@ export class Renderer {
             this.boringBoxes.push(objects);
         });
 
+        // Triangles
+        this.defaultGameState.triangles.forEach(item => {
+            let objects = item.draw();
+            this.triangles.push(objects);
+        });
+
         // Combine all sets of objects
-        let allSets = [...this.lasers, ...this.boringBoxes];
+        let allSets = [...this.lasers, ...this.boringBoxes, ...this.triangles];
 
         // Draw all objects on screen
         allSets.forEach(set => {
@@ -57,5 +65,6 @@ export class Renderer {
         // Apply game state to all gfx objects
         gameState.lasers.forEach((item, index) => item.applyStateToGraphics(this.lasers[index]));
         gameState.boringBoxes.forEach((item, index) => item.applyStateToGraphics(this.boringBoxes[index]));
+        gameState.triangles.forEach((item, index) => item.applyStateToGraphics(this.triangles[index]));
     }
 }

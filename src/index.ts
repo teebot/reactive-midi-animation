@@ -36,7 +36,7 @@ gameLoop$.subscribe((gameState: GameState) => {
 
 // Map graphics to MIDI inputs (e.g. lasers or boxes) TODO: Make this dynamic, so we can swap them on runtime
 const graphicsMidiInputMap = {};
-const unassignedGraphics = ['lasers', 'boringBoxes'];
+const unassignedGraphics = ['lasers', 'triangles', 'boringBoxes'];
 
 // Print midi inputs and assign to map
 midiInputs$.subscribe((inputs: Array<MIDIInput>) => {
@@ -73,9 +73,19 @@ function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: a
             }
         });
 
+        // Boring Boxes (note-independent, up to 3 visible at the same time)
+        const triangleNotes = midiNotes.filter(item => item.inputId === graphicsMidiInputMap['triangles']);
+        state.triangles.forEach((item, index) => {
+            if (index + 1 <= triangleNotes.length) {
+                item.animate(index);
+            } else if (item.isVisible) {
+                item.stop(index);
+            }
+        });
+
         // TODO: Dealing with an issue right now when you press keys on both a midi input and the keyboard,
         // the stream no longer contains one or the other and stops animating them
-        console.log(laserNotes.length, boringBoxNotes.length);
+        console.log(laserNotes.length, boringBoxNotes.length, triangleNotes.length);
 
         // TODO: I should be able to still call animate if key is still down, remember which ones are animating!
         /*state.boringBoxes.forEach((item, index) => {
@@ -105,6 +115,7 @@ function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: a
         // Initiate stop animation for all visible objects
         state.lasers.filter(item => item.isVisible).forEach((item, index) => item.stop(index));
         state.boringBoxes.filter(item => item.isVisible).forEach((item, index) => item.stop(index));
+        state.triangles.filter(item => item.isVisible).forEach((item, index) => item.stop(index));
     }
     return state;
 }
