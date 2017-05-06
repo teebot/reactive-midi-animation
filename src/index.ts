@@ -50,8 +50,6 @@ midiInputs$.subscribe((inputs: Array<MIDIInput>) => {
 });
 
 function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: any): GameState {
-    // TODO: Map keys to lasers and store which ones are on in an array or stream (using a map of keys: gfx objects)
-
     if (midiNotes.length) {
         // Lasers
         const laserNotes = midiNotes.filter(item => item.inputId === graphicsMidiInputMap['lasers']);
@@ -82,34 +80,6 @@ function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: a
                 item.stop(index);
             }
         });
-
-        // TODO: Dealing with an issue right now when you press keys on both a midi input and the keyboard,
-        // the stream no longer contains one or the other and stops animating them
-        console.log(laserNotes.length, boringBoxNotes.length, triangleNotes.length);
-
-        // TODO: I should be able to still call animate if key is still down, remember which ones are animating!
-        /*state.boringBoxes.forEach((item, index) => {
-            // Loop over notes being played
-            let animatingThisIndex = false;
-            boringBoxNotes.forEach(note => {
-                // If not currently animating this note
-                if (boringBoxNotes.length && !((note.note.key + note.note.octave) in animatingBoxNotes)) {
-                    // Add it to the list of things to start (or keep on) animating
-                    animatingBoxNotes[note.note.key + note.note.octave] = index;
-                    animatingThisIndex = true;
-                }
-            });
-
-            if (!animatingThisIndex && item.isVisible) {
-                item.stop(index);
-            }
-        });
-
-        Object.keys(animatingBoxNotes).forEach(key => {
-            const index = animatingBoxNotes[key];
-            state.boringBoxes[index].animate(index)
-
-        });*/
 
     } else {
         // Initiate stop animation for all visible objects
