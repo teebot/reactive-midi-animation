@@ -71,6 +71,7 @@ export class Laser extends Base {
         backLine.lineStyle(4, this.color, this.opacity);
         backLine.moveTo(this.x, this.y);
         backLine.lineTo(this.x2, this.y2);
+        backLine.alpha = 0;
         const dropShadowFilter = new filters.BlurFilter();
         dropShadowFilter.blur = 6;
         backLine.filters = [dropShadowFilter];
@@ -79,6 +80,7 @@ export class Laser extends Base {
         frontLine.lineStyle(4, this.color, this.opacity);
         frontLine.moveTo(this.x, this.y);
         frontLine.lineTo(this.x2, this.y2);
+        frontLine.alpha = 0;
 
         return [backLine, frontLine];
     }

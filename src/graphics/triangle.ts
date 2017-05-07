@@ -64,6 +64,7 @@ export class Triangle extends Base {
             this.x + Math.round(this.width / 2), this.y + Math.round(this.height / 2),
             this.x - Math.round(this.width / 2), this.y + Math.round(this.height / 2)
         ]);
+        triangle.alpha = 0;
         triangle.endFill();
         return [triangle];
     }

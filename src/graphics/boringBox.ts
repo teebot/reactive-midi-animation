@@ -57,6 +57,7 @@ export class BoringBox extends Base {
         box.lineStyle(8, 0xFFFFFF, this.opacity);
         box.beginFill(0x66CCFF, 0);
         box.drawRect(this.x, this.y, this.x2 - this.x, this.y2 - this.y);
+        box.alpha = 0;
         box.endFill();
         return [box];
     }
