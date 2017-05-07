@@ -13,6 +13,14 @@ export abstract class Base {
     isKeyDown: boolean;
     isDecaying: boolean;
 
+    // Animation types (const)
+    static ANIMATION_TYPE_STACK = 'stack'; // If first item is visible or decaying, animate second item, etc.
+    static ANIMATION_TYPE_PIANO = 'piano'; // Map notes to objects (e.g. 12 lines = 12 notes)
+    static ANIMATION_TYPE_AMOUNT = 'amount'; // Based on the amount of keys pressed (in order)
+    static ANIMATION_TYPE_RANDOM = 'random'; // Animate any non-visible non-decaying object
+    static ANIMATION_TYPE_SOLO = 'solo'; // Always trigger the same object (e.g. for a "kick" effect)
+    animationType: string;
+
     constructor(
         x: number,
         y: number,
@@ -30,6 +38,7 @@ export abstract class Base {
         this.isVisible = false;
         this.isKeyDown = false;
         this.isDecaying = false;
+        this.animationType = Base.ANIMATION_TYPE_RANDOM; // Default = random, unless overridden
     }
 
     animate(objectIndex : number) {

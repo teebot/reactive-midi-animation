@@ -6,8 +6,7 @@ export class BoringBox extends Base {
     y2: number;
 
     private static defaults = [
-        {x: 200, x2: 600, y: 100, y2: 500, opacity: 1, appearedAt: 0, decayFor: 1000, sustain: true},
-        {x: 210, x2: 590, y: 110, y2: 490, opacity: 1, appearedAt: 0, decayFor: 1000, sustain: true}
+        {x: 200, x2: 600, y: 100, y2: 500, opacity: 1, appearedAt: 0, decayFor: 1000, sustain: true}
     ];
 
     constructor(objectIndex) {
@@ -21,6 +20,7 @@ export class BoringBox extends Base {
         );
         this.x2 = BoringBox.defaults[objectIndex].x2;
         this.y2 = BoringBox.defaults[objectIndex].y2;
+        this.animationType = Base.ANIMATION_TYPE_STACK;
     }
 
     animate(objectIndex : number) {
@@ -64,5 +64,7 @@ export class BoringBox extends Base {
 
     applyStateToGraphics(gfxObjects: Array<Graphics>) {
         gfxObjects[0].alpha = this.isVisible ? this.opacity : 0;
+
+        // Todo: Rotation + time = http://stackoverflow.com/questions/17505169/pixi-js-pivot-affects-object-position
     }
 }

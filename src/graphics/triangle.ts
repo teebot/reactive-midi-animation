@@ -7,8 +7,9 @@ export class Triangle extends Base {
     color: number;
 
     private static defaults = [
-        {x: 400, y: 300, width: 100, height: 100, color: 0xAA0000, opacity: 1, appearedAt: 0, decayFor: 1000, sustain: true},
-        {x: 400, y: 290, width: 120, height: 120, color: 0xCC0000, opacity: 1, appearedAt: 0, decayFor: 1000, sustain: true},
+        {x: 400, y: 310, width: 80, height: 80, color: 0x990000, opacity: 1, appearedAt: 0, decayFor: 1300, sustain: true},
+        {x: 400, y: 300, width: 100, height: 100, color: 0xAA0000, opacity: 1, appearedAt: 0, decayFor: 1200, sustain: true},
+        {x: 400, y: 290, width: 120, height: 120, color: 0xCC0000, opacity: 1, appearedAt: 0, decayFor: 1100, sustain: true},
         {x: 400, y: 280, width: 140, height: 140, color: 0xFF0000, opacity: 1, appearedAt: 0, decayFor: 1000, sustain: true}
     ];
 
@@ -24,6 +25,7 @@ export class Triangle extends Base {
         this.width = Triangle.defaults[objectIndex].width;
         this.height = Triangle.defaults[objectIndex].height;
         this.color = Triangle.defaults[objectIndex].color;
+        this.animationType = Base.ANIMATION_TYPE_AMOUNT;
     }
 
     animate(objectIndex : number) {

@@ -35,23 +35,34 @@ export class GraphicTypeSelector {
 
     // Handle dropdown changes (when an input has changed its graphics type)
     handleGraphicsChange(event) {
-        // TODO: There is a bug here regarding the previously selected value... you can fix it by getting all current
-        // values, then comparing with the one that changed or something, and removing those that are unassigned!
+
         //let x = Object.values(graphicsMidiInputMap);
-        console.log('keys', Object.keys(this.graphicsMidiInputMap));
-        console.log('currval', event.srcElement.value);
-        if (event.srcElement.value in Object.keys(this.graphicsMidiInputMap)) {
-            delete this.graphicsMidiInputMap[event.srcElement.value];
+        const newInputId = event.srcElement.id.substring(6);
+        const newGraphicsType = event.srcElement.value;
+
+        let foundConflictingValue = false;
+        Object.keys(this.graphicsMidiInputMap).forEach(graphicsType => {
+            let currentInputId = this.graphicsMidiInputMap[graphicsType];
+            if (currentInputId === newInputId && graphicsType !== newGraphicsType) {
+                // Are there any other graphics set to my input?
+                foundConflictingValue = true;
+                this.graphicsMidiInputMap[graphicsType] = null;
+            }
+        });
+
+        if (foundConflictingValue) {
+            // Update dropdowns to show real values
+            // TODO
         }
 
-        this.graphicsMidiInputMap[event.srcElement.value] = event.srcElement.id.substring(6);
+        this.graphicsMidiInputMap[newGraphicsType] = newInputId;
         console.log(this.graphicsMidiInputMap);
     }
 
     renderInputItems(inputs : Array<MIDIInput>) {
         // Display MIDI inputs and assign + map them to types of graphics
         inputs.forEach(input => {
-            let graphicToAssign;
+            let graphicToAssign = null;
             if (this.unassignedGraphics.length) {
                 graphicToAssign = this.unassignedGraphics.pop();
                 this.graphicsMidiInputMap[graphicToAssign] = input.id; // e.g. lasers: 123901
@@ -70,12 +81,21 @@ export class GraphicTypeSelector {
             fullListOfGraphics.sort().forEach(item => {
                 select.options.add(new Option(item, item, true, item === graphicToAssign));
             });
-            select.addEventListener('change', this.handleGraphicsChange, false);
+            select.options.add(new Option('none', 'none', true, graphicToAssign === null));
+            let that = this;
+            select.addEventListener('change', function(event) { that.handleGraphicsChange(event); }, false);
             selectContainer.appendChild(select);
             inputSelector.appendChild(selectContainer);
             inputDiv.appendChild(inputTitle);
             inputDiv.appendChild(inputSelector);
             this.sidebar.appendChild(inputDiv);
         });
+
+        // If we still have unassigned graphics, set their inputs to null
+        if (this.unassignedGraphics.length) {
+            this.unassignedGraphics.forEach(graphicType => {
+                this.graphicsMidiInputMap[graphicType] = null;
+            });
+        }
     }
 }

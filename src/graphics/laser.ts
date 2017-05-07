@@ -30,6 +30,7 @@ export class Laser extends Base {
         this.y2 = Laser.defaults[objectIndex].y2;
         this.color = Laser.defaults[objectIndex].color;
         this.glow = Laser.defaults[objectIndex].glow;
+        this.animationType = Base.ANIMATION_TYPE_RANDOM;
     }
 
     animate(objectIndex : number) {
