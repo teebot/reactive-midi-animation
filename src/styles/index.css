@@ -27,6 +27,10 @@ h3 {
     color: #cccccc;
 }
 
+.sidebar button {
+    margin-bottom: 20px;
+}
+
 .sidebar .input {
     border: solid 1px #dddddd;
     border-radius: 3px;

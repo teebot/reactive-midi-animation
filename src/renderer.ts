@@ -1,7 +1,6 @@
 import {Graphics, Application} from 'pixi.js';
 import {GameState} from './types/gameState';
 
-
 /**
  * This class initialises all possible graphics based visible the default game state
  * And implements a render routine which will take the current game state and apply all
@@ -13,16 +12,34 @@ export class Renderer {
     lasers: Array<Array<Graphics>>;
     boringBoxes: Array<Array<Graphics>>;
     triangles: Array<Array<Graphics>>;
+    graphicTypes: Array<string>;
+    canvasDomContainer: HTMLCanvasElement;
 
-    constructor(defaultGameState, domElement) {
+    constructor(defaultGameState, canvasDomContainer) {
         // Initialise PixiJS application
         this.defaultGameState = defaultGameState;
+        this.canvasDomContainer = canvasDomContainer;
         this.app = new Application(800, 600, {backgroundColor: 0x000000});
         this.lasers = [];
         this.boringBoxes = [];
         this.triangles = [];
-        domElement.appendChild(this.app.view);
+        this.graphicTypes = ['lasers', 'triangles', 'boringBoxes'];
+
+        // Render canvas element and all graphics
+        this.canvasDomContainer.appendChild(this.app.view);
         this.init();
+
+        // Add full screen handler
+        this.canvasDomContainer.querySelector('canvas').addEventListener('dblclick', this.fullscreenHandler);
+    }
+
+    fullscreenHandler(): void {
+        const el = document.querySelector('canvas');
+        if(el.webkitRequestFullScreen) {
+            el.webkitRequestFullScreen();
+        } else {
+            console.log('Full screen not supported')
+        }
     }
 
     /**
@@ -33,6 +50,8 @@ export class Renderer {
      * - Stage all objects (by iterating over allSets we extract each object and draw it)
      */
     init(): void {
+        // TODO: Make generic based on graphicTypes
+
         // Lasers
         this.defaultGameState.lasers.forEach(item => {
             let objects = item.draw();
