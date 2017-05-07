@@ -18,7 +18,7 @@ export class GraphicTypeSelector {
     ) {
         this.sidebar = sidebar;
         this.graphicTypes = graphicTypes;
-        this.unassignedGraphics = graphicTypes;
+        this.unassignedGraphics = [...graphicTypes]; // Copy
         this.graphicsMidiInputMap = {};
         midiInputs$.subscribe((inputs: Array<MIDIInput>) => {
             this.clearSidebar();

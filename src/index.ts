@@ -30,7 +30,10 @@ const gameLoop$ = ticker$.combineLatest(midi$)
             mutateGameState(midiNotes, state, ticker)
         , defaultGameState);
 
-const renderer = new Renderer(defaultGameState, document.querySelector('.fireplace'));
+const renderer = new Renderer(
+    defaultGameState,
+    document.querySelector('.fireplace')
+);
 
 const graphicTypeSelector = new GraphicTypeSelector(
     midiInputs$,
@@ -45,43 +48,23 @@ gameLoop$.subscribe((gameState: GameState) => {
 
 function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: any): GameState {
     if (midiNotes.length) {
-        // TODO: Make generic based on graphicTypes (from renderer)
-
-        // Lasers
-        const laserNotes = midiNotes.filter(item => item.inputId === graphicTypeSelector.graphicsMidiInputMap['lasers']);
-        state.lasers.forEach((item, index) => {
-            if (index + 1 <= laserNotes.length) {
-                item.animate(index);
-            } else if (item.isVisible) {
-                item.stop(index);
-            }
-        });
-
-        // Boring Boxes (note-independent, up to 3 visible at the same time)
-        const boringBoxNotes = midiNotes.filter(item => item.inputId === graphicTypeSelector.graphicsMidiInputMap['boringBoxes']);
-        state.boringBoxes.forEach((item, index) => {
-            if (index + 1 <= boringBoxNotes.length) {
-                item.animate(index);
-            } else if (item.isVisible) {
-                item.stop(index);
-            }
-        });
-
-        // Boring Boxes (note-independent, up to 3 visible at the same time)
-        const triangleNotes = midiNotes.filter(item => item.inputId === graphicTypeSelector.graphicsMidiInputMap['triangles']);
-        state.triangles.forEach((item, index) => {
-            if (index + 1 <= triangleNotes.length) {
-                item.animate(index);
-            } else if (item.isVisible) {
-                item.stop(index);
-            }
+        renderer.graphicTypes.forEach(graphicType => {
+            const graphicNotes = midiNotes.filter(i => i.inputId === graphicTypeSelector.graphicsMidiInputMap[graphicType]);
+            state[graphicType].forEach((item, index) => {
+                // TODO: Animate in different ways (key-note map, etc.)
+                if (index + 1 <= graphicNotes.length) {
+                    item.animate(index);
+                } else if (item.isVisible) {
+                    item.stop(index);
+                }
+            });
         });
 
     } else {
         // Initiate stop animation for all visible objects
-        state.lasers.filter(item => item.isVisible).forEach((item, index) => item.stop(index));
-        state.boringBoxes.filter(item => item.isVisible).forEach((item, index) => item.stop(index));
-        state.triangles.filter(item => item.isVisible).forEach((item, index) => item.stop(index));
+        renderer.graphicTypes.forEach(graphicType => {
+            state[graphicType].filter(item => item.isVisible).forEach((item, index) => item.stop(index));
+        });
     }
     return state;
 }
