@@ -10,6 +10,7 @@ export class GraphicTypeSelector {
     graphicTypes: Array<string>;
     graphicsMidiInputMap: any; // Object containing map of type to input (e.g. boringBoxes: "123123")
     unassignedGraphics: Array<string>;
+    currentInputs: Array<MIDIInput>;
 
     constructor(
         midiInputs$: Observable<Array<MIDIInput>>,
@@ -21,8 +22,10 @@ export class GraphicTypeSelector {
         this.unassignedGraphics = [...graphicTypes]; // Copy
         this.graphicsMidiInputMap = {};
         midiInputs$.subscribe((inputs: Array<MIDIInput>) => {
+            this.currentInputs = inputs;
             this.clearSidebar();
-            this.renderInputItems(inputs);
+            this.autoAssignInputs();
+            this.renderInputItems();
         });
     }
 
@@ -50,23 +53,43 @@ export class GraphicTypeSelector {
             }
         });
 
+        this.graphicsMidiInputMap[newGraphicsType] = newInputId;
+
         if (foundConflictingValue) {
             // Update dropdowns to show real values
-            // TODO
+            this.clearSidebar();
+            this.renderInputItems();
         }
-
-        this.graphicsMidiInputMap[newGraphicsType] = newInputId;
-        console.log(this.graphicsMidiInputMap);
     }
 
-    renderInputItems(inputs : Array<MIDIInput>) {
+    autoAssignInputs() {
         // Display MIDI inputs and assign + map them to types of graphics
-        inputs.forEach(input => {
+        this.currentInputs.forEach(input => {
             let graphicToAssign = null;
             if (this.unassignedGraphics.length) {
                 graphicToAssign = this.unassignedGraphics.pop();
                 this.graphicsMidiInputMap[graphicToAssign] = input.id; // e.g. lasers: 123901
             }
+        });
+
+        // If we still have unassigned graphics, set their inputs to null
+        if (this.unassignedGraphics.length) {
+            this.unassignedGraphics.forEach(graphicType => {
+                this.graphicsMidiInputMap[graphicType] = null;
+            });
+        }
+    }
+
+    renderInputItems() {
+        // Display MIDI inputs and assign + map them to types of graphics
+        this.currentInputs.forEach(input => {
+            let selectedGraphic = null;
+            Object.keys(this.graphicsMidiInputMap).forEach(graphicType => {
+                if (this.graphicsMidiInputMap[graphicType] === input.id) {
+                    selectedGraphic = graphicType;
+                }
+            });
+
             let inputDiv = document.createElement('div');
             inputDiv.className = 'input';
             let inputTitle = document.createElement('div');
@@ -77,11 +100,10 @@ export class GraphicTypeSelector {
             let selectContainer = document.createDocumentFragment(),
                 select = document.createElement("select");
             select.id = 'input-' + input.id;
-            let fullListOfGraphics = Object.keys(this.graphicsMidiInputMap).concat(this.unassignedGraphics);
-            fullListOfGraphics.sort().forEach(item => {
-                select.options.add(new Option(item, item, true, item === graphicToAssign));
+            Object.keys(this.graphicsMidiInputMap).sort().forEach(item => {
+                select.options.add(new Option(item, item, true, item === selectedGraphic));
             });
-            select.options.add(new Option('none', 'none', true, graphicToAssign === null));
+            select.options.add(new Option('none', 'none', true, selectedGraphic === null));
             let that = this;
             select.addEventListener('change', function(event) { that.handleGraphicsChange(event); }, false);
             selectContainer.appendChild(select);
@@ -90,12 +112,5 @@ export class GraphicTypeSelector {
             inputDiv.appendChild(inputSelector);
             this.sidebar.appendChild(inputDiv);
         });
-
-        // If we still have unassigned graphics, set their inputs to null
-        if (this.unassignedGraphics.length) {
-            this.unassignedGraphics.forEach(graphicType => {
-                this.graphicsMidiInputMap[graphicType] = null;
-            });
-        }
     }
 }
