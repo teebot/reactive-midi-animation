@@ -6,19 +6,15 @@ import {Observable} from "rxjs/Observable";
  * For example: MIDI Input 1 = Triangles
  */
 export class GraphicTypeSelector {
-    sidebar: Element;
-    graphicTypes: Array<string>;
     graphicsMidiInputMap: any; // Object containing map of type to input (e.g. boringBoxes: "123123")
     unassignedGraphics: Array<string>;
     currentInputs: Array<MIDIInput>;
 
     constructor(
         midiInputs$: Observable<Array<MIDIInput>>,
-        sidebar: Element,
-        graphicTypes: Array<string>
+        private sidebar: Element,
+        private graphicTypes: Array<string>
     ) {
-        this.sidebar = sidebar;
-        this.graphicTypes = graphicTypes;
         this.unassignedGraphics = [...graphicTypes]; // Copy
         this.graphicsMidiInputMap = {};
         midiInputs$.subscribe((inputs: Array<MIDIInput>) => {
