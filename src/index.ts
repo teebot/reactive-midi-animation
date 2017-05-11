@@ -7,9 +7,10 @@ import {MIDINote} from './types/midiNote';
 import MIDIInput = WebMidi.MIDIInput;
 import './styles/index.css';
 import './styles/fire.css';
-import {GraphicTypeSelector} from "./graphicTypeSelector";
+import {getGraphicTypeSelection} from "./graphicTypeSelector";
 import {Base} from "./graphics/base";
 import {shuffle} from "./utils/shuffle";
+import {GraphicInputMapping} from './types/graphicInputMapping';
 
 const TICKER_INTERVAL = 17;
 const ticker$ = Observable
@@ -25,22 +26,20 @@ const ticker$ = Observable
         })
     );
 
+const graphicMapping$ = midiInputs$.flatMap(midiInputs =>
+    getGraphicTypeSelection(midiInputs, renderer.graphicTypes, document.querySelector('.sidebar'))
+);
+
 const midi$ = Observable.merge(keyboard$, midiInputTriggers$);
 
-const gameLoop$ = ticker$.combineLatest(midi$)
-    .scan((state: GameState, [ticker, midiNotes]) =>
-            mutateGameState(midiNotes, state, ticker)
+const gameLoop$ = ticker$.combineLatest(midi$, graphicMapping$)
+    .scan((state: GameState, [ticker, midiNotes, graphicMapping]) =>
+            mutateGameState(midiNotes, state, ticker, graphicMapping)
         , defaultGameState);
 
 const renderer = new Renderer(
     defaultGameState,
     document.querySelector('.fireplace')
-);
-
-const graphicTypeSelector = new GraphicTypeSelector(
-    midiInputs$,
-    document.querySelector('.sidebar'),
-    renderer.graphicTypes
 );
 
 // Gameloop
@@ -54,12 +53,12 @@ let activeObjectsPerGraphicType = renderer.graphicTypes.reduce(function(result, 
     return result;
 }, {});
 
-function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: any): GameState {
+function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: any, graphicMapping: Array<GraphicInputMapping>): GameState {
     if (midiNotes.length) {
         // Loop through each type of graphic (lasers, triangles, ...)
         renderer.graphicTypes.forEach(graphicType => {
             // Get the notes that are pressed for the input associated with this graphic (and a list of keys+octaves)
-            const graphicNotes = midiNotes.filter(i => i.inputId === graphicTypeSelector.graphicsMidiInputMap[graphicType]);
+            const graphicNotes = midiNotes.filter(i => i.inputId === graphicMapping.find(g => g.graphicType === graphicType).inputId);//graphicTypeSelector.graphicsMidiInputMap[graphicType]);
             const pressedNoteStrings =  graphicNotes.map(midi => midi.note.key + midi.note.octave); // e.g. ['C#5', 'D#5']
 
             // Get the type of animation we are going to apply for this graphic (e.g. random, piano, stack)

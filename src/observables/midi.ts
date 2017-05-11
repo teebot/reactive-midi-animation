@@ -18,7 +18,7 @@ const fakeKeyboardMIDIInput = {
 export const midiInputs$ = Observable.fromPromise(navigator.requestMIDIAccess())
     .map((midi: MIDIAccess) => {
         const midiInputs = Array.from(midi.inputs).map(([id, input]) => input);
-        return [fakeKeyboardMIDIInput, ...midiInputs];
+        return [<MIDIInput>fakeKeyboardMIDIInput, ...midiInputs];
     });
 
 /**

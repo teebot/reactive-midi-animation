@@ -1,112 +1,40 @@
 import MIDIInput = WebMidi.MIDIInput;
-import {Observable} from "rxjs/Observable";
+import {Observable} from 'rxjs/Observable';
+import * as h from 'hyperscript';
+import {GraphicInputMapping} from './types/graphicInputMapping';
 
 /**
  * Adds input items to a sidebar to allow users to select types of graphics to use per input
  * For example: MIDI Input 1 = Triangles
  */
-export class GraphicTypeSelector {
-    graphicsMidiInputMap: any; // Object containing map of type to input (e.g. boringBoxes: "123123")
-    unassignedGraphics: Array<string>;
-    currentInputs: Array<MIDIInput>;
+export function getGraphicTypeSelection(midiInputs: Array<MIDIInput>,
+                                        graphicTypes: Array<string>,
+                                        sideBarElement: Element): Observable<Array<GraphicInputMapping>> {
 
-    constructor(
-        midiInputs$: Observable<Array<MIDIInput>>,
-        private sidebar: Element,
-        private graphicTypes: Array<string>
-    ) {
-        this.unassignedGraphics = [...graphicTypes]; // Copy
-        this.graphicsMidiInputMap = {};
-        midiInputs$.subscribe((inputs: Array<MIDIInput>) => {
-            this.currentInputs = inputs;
-            this.clearSidebar();
-            this.autoAssignInputs();
-            this.renderInputItems();
-        });
-    }
+    const initialMapping: Array<GraphicInputMapping> = [];
 
-    clearSidebar(): void {
-        // Remove any existing input items from the sidebar
-        Array.prototype.forEach.call(this.sidebar.querySelectorAll('.input'), function( node ) {
-            node.parentNode.removeChild(node);
-        });
-    }
+    const selectBoxes = midiInputs.map((midiInput, index) => {
+        const initialGraphicType = graphicTypes[index];
+        initialMapping.push({inputId: midiInput.id, graphicType: initialGraphicType});
 
-    // Handle dropdown changes (when an input has changed its graphics type)
-    handleGraphicsChange(event) {
+        const selectBox = renderSelectBox(midiInput, graphicTypes, initialGraphicType);
+        sideBarElement.appendChild(h('div.input', [h('div.title', midiInput.name), h('div.selector', selectBox)]));
+        return selectBox;
+    });
 
-        //let x = Object.values(graphicsMidiInputMap);
-        const newInputId = event.srcElement.id.substring(6);
-        const newGraphicsType = event.srcElement.value;
+    // return all select values if one of them changes
+    return Observable.merge(...selectBoxes.map(s =>
+            Observable.fromEvent(s, 'change')
+                .map(event =>
+                    selectBoxes.map(s => ({inputId: s.name, graphicType: s.value})))
+        )
+    ).startWith(initialMapping);
+}
 
-        let foundConflictingValue = false;
-        Object.keys(this.graphicsMidiInputMap).forEach(graphicsType => {
-            let currentInputId = this.graphicsMidiInputMap[graphicsType];
-            if (currentInputId === newInputId && graphicsType !== newGraphicsType) {
-                // Are there any other graphics set to my input?
-                foundConflictingValue = true;
-                this.graphicsMidiInputMap[graphicsType] = null;
-            }
-        });
-
-        this.graphicsMidiInputMap[newGraphicsType] = newInputId;
-
-        if (foundConflictingValue) {
-            // Update dropdowns to show real values
-            this.clearSidebar();
-            this.renderInputItems();
-        }
-    }
-
-    autoAssignInputs() {
-        // Display MIDI inputs and assign + map them to types of graphics
-        this.currentInputs.forEach(input => {
-            let graphicToAssign = null;
-            if (this.unassignedGraphics.length) {
-                graphicToAssign = this.unassignedGraphics.pop();
-                this.graphicsMidiInputMap[graphicToAssign] = input.id; // e.g. lasers: 123901
-            }
-        });
-
-        // If we still have unassigned graphics, set their inputs to null
-        if (this.unassignedGraphics.length) {
-            this.unassignedGraphics.forEach(graphicType => {
-                this.graphicsMidiInputMap[graphicType] = null;
-            });
-        }
-    }
-
-    renderInputItems() {
-        // Display MIDI inputs and assign + map them to types of graphics
-        this.currentInputs.forEach(input => {
-            let selectedGraphic = null;
-            Object.keys(this.graphicsMidiInputMap).forEach(graphicType => {
-                if (this.graphicsMidiInputMap[graphicType] === input.id) {
-                    selectedGraphic = graphicType;
-                }
-            });
-
-            let inputDiv = document.createElement('div');
-            inputDiv.className = 'input';
-            let inputTitle = document.createElement('div');
-            inputTitle.className = 'title';
-            inputTitle.textContent = input.name;
-            let inputSelector = document.createElement('div');
-            inputSelector.className = 'selector';
-            let selectContainer = document.createDocumentFragment(),
-                select = document.createElement("select");
-            select.id = 'input-' + input.id;
-            Object.keys(this.graphicsMidiInputMap).sort().forEach(item => {
-                select.options.add(new Option(item, item, true, item === selectedGraphic));
-            });
-            select.options.add(new Option('none', 'none', true, selectedGraphic === null));
-            let that = this;
-            select.addEventListener('change', function(event) { that.handleGraphicsChange(event); }, false);
-            selectContainer.appendChild(select);
-            inputSelector.appendChild(selectContainer);
-            inputDiv.appendChild(inputTitle);
-            inputDiv.appendChild(inputSelector);
-            this.sidebar.appendChild(inputDiv);
-        });
-    }
+function renderSelectBox(input: MIDIInput, graphicTypes: Array<string>, initialValue): HTMLSelectElement {
+    return h('select', {name: input.id},
+        graphicTypes.map(graphicType =>
+            h('option', {selected: graphicType === initialValue}, graphicType)
+        )
+    );
 }
