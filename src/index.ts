@@ -10,6 +10,7 @@ import './styles/fire.css';
 import {getGraphicTypeSelection} from "./graphicTypeSelector";
 import {Base} from "./graphics/base";
 import {shuffle} from "./utils/shuffle";
+import {intersectionBy} from "lodash";
 import {GraphicInputMapping} from './types/graphicInputMapping';
 
 const TICKER_INTERVAL = 17;
@@ -58,8 +59,9 @@ function mutateGameState(midiNotes: Array<MIDINote>, state: GameState, ticker: a
         // Loop through each type of graphic (lasers, triangles, ...)
         renderer.graphicTypes.forEach(graphicType => {
             // Get the notes that are pressed for the input associated with this graphic (and a list of keys+octaves)
-            const graphicNotes = midiNotes.filter(i => i.inputId === graphicMapping.find(g => g.graphicType === graphicType).inputId);//graphicTypeSelector.graphicsMidiInputMap[graphicType]);
-            const pressedNoteStrings =  graphicNotes.map(midi => midi.note.key + midi.note.octave); // e.g. ['C#5', 'D#5']
+            const matchingInputs = graphicMapping.filter(g => g.graphicType === graphicType);
+            const graphicNotes = intersectionBy(midiNotes, matchingInputs, 'inputId');
+            const pressedNoteStrings = graphicNotes.map(midi => midi.note.key + midi.note.octave); // e.g. ['C#5', 'D#5']
 
             // Get the type of animation we are going to apply for this graphic (e.g. random, piano, stack)
             const animationType = state[graphicType][0].animationType || Base.ANIMATION_TYPE_RANDOM;

@@ -24,17 +24,19 @@ export function getGraphicTypeSelection(midiInputs: Array<MIDIInput>,
 
     // return all select values if one of them changes
     return Observable.merge(...selectBoxes.map(s =>
-            Observable.fromEvent(s, 'change')
-                .map(event =>
-                    selectBoxes.map(s => ({inputId: s.name, graphicType: s.value})))
-        )
-    ).startWith(initialMapping);
+        Observable.fromEvent(s, 'change')
+            .map((event) =>{
+                console.log((<any>event).target.value);
+                return selectBoxes.map(s => ({inputId: s.name, graphicType: s.value}))}
+            )))
+        .startWith(initialMapping);
 }
 
 function renderSelectBox(input: MIDIInput, graphicTypes: Array<string>, initialValue): HTMLSelectElement {
     return h('select', {name: input.id},
-        graphicTypes.map(graphicType =>
-            h('option', {selected: graphicType === initialValue}, graphicType)
-        )
+        [h('option', {selected: initialValue === undefined}, 'none'),
+            ...graphicTypes.map(graphicType =>
+                h('option', {selected: graphicType === initialValue}, graphicType)
+            )]
     );
 }
