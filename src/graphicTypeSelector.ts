@@ -6,6 +6,7 @@ import {GraphicInputMapping} from './types/graphicInputMapping';
 /**
  * Adds input items to a sidebar to allow users to select types of graphics to use per input
  * For example: MIDI Input 1 = Triangles
+ * For example: MIDI Input 1 = Triangles
  */
 export function getGraphicTypeSelection(midiInputs: Array<MIDIInput>,
                                         graphicTypes: Array<string>,
@@ -25,9 +26,8 @@ export function getGraphicTypeSelection(midiInputs: Array<MIDIInput>,
     // return all select values if one of them changes
     return Observable.merge(...selectBoxes.map(s =>
         Observable.fromEvent(s, 'change')
-            .map((event) =>{
-                console.log((<any>event).target.value);
-                return selectBoxes.map(s => ({inputId: s.name, graphicType: s.value}))}
+            .map(_ =>
+                selectBoxes.map(s => ({inputId: s.name, graphicType: s.value}))
             )))
         .startWith(initialMapping);
 }

@@ -29,11 +29,11 @@ export const midiInputs$ = Observable.fromPromise(navigator.requestMIDIAccess())
 let pushedNotes: Array<MIDINote> = [];
 export const midiInputTriggers$ = midiInputs$
     .flatMap(inputs =>
-        Observable.create((observer) => {
-            inputs.forEach(i => {
-                i.onmidimessage = (event) => observer.next(event);
-            })
-        })
+        Observable.create((observer) =>
+            inputs.forEach(i =>
+                i.onmidimessage = (event) => observer.next(event)
+            )
+        )
     )
     .filter((midiMessage: MIDIMessageEvent) =>
         midiMessage.data[0] >= 128 && midiMessage.data[0] <= 159
