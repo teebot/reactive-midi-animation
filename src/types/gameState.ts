@@ -24,13 +24,13 @@ export const defaultGameState: GameState = {
         new Laser(5)
     ],
     boringBoxes: [
-        new BoringBox(0),
-        new BoringBox(1)
+        new BoringBox(0)
     ],
     triangles: [
         new Triangle(0),
         new Triangle(1),
-        new Triangle(2)
+        new Triangle(2),
+        new Triangle(3)
     ]
 };
 

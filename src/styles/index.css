@@ -1,0 +1,79 @@
+html, body {
+    margin: 0;
+    background: #202020;
+}
+
+.container {
+    margin-top: 40px;
+    max-width: 1200px;
+}
+
+h1 {
+    text-transform: uppercase;
+    color: #eeeeee;
+    font-weight: 200;
+}
+
+h3 {
+    text-transform: uppercase;
+    color: #dddddd;
+    margin-top: -20px;
+    margin-bottom: 30px;
+    font-size: 17px;
+    letter-spacing: 1.5px;
+}
+
+.sidebar {
+    color: #cccccc;
+}
+
+.sidebar button {
+    margin-bottom: 20px;
+}
+
+.sidebar .input {
+    border: solid 1px #dddddd;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.sidebar .input .title {
+    background-color: #dddddd;
+    text-align: center;
+    color: #202020;
+    padding: 2px 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.sidebar .input .selector {
+    text-align: center;
+    padding: 4px 10px;
+}
+
+.sidebar .input .selector select {
+    width: 100%;
+    margin-bottom: 0;
+    background: none;
+    color: #fff;
+    border: none 0px #000;
+}
+
+/* Mobile first queries */
+
+/* Larger than mobile */
+@media (min-width: 400px) {}
+
+/* Larger than phablet */
+@media (min-width: 550px) {}
+
+/* Larger than tablet */
+@media (min-width: 750px) {}
+
+/* Larger than desktop */
+@media (min-width: 1000px) {}
+
+/* Larger than Desktop HD */
+@media (min-width: 1200px) {}
