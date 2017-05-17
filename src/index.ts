@@ -1,6 +1,6 @@
 import {Observable, Scheduler} from 'rxjs';
 import {defaultGameState, GameState} from './types/gameState';
-import {Renderer} from './renderer';
+import {pixiApp} from './renderer';
 import {keyboard$} from './observables/keyboard';
 import {midiInputs$, midiInputTriggers$} from './observables/midi';
 import {MIDINote} from './types/midiNote';
@@ -12,8 +12,8 @@ import {Base} from './graphics/base';
 import {shuffle} from './utils/shuffle';
 import {intersectionBy} from 'lodash';
 import {GraphicInputMapping} from './types/graphicInputMapping';
-import {Graphics} from 'pixi.js';
 
+const graphicTypes = ['lasers', 'triangles', 'boringBoxes'];
 const TICKER_INTERVAL = 17;
 const ticker$ = Observable
     .interval(TICKER_INTERVAL, Scheduler.animationFrame)
@@ -29,7 +29,7 @@ const ticker$ = Observable
     );
 
 const graphicMapping$ = midiInputs$.flatMap(midiInputs =>
-    getGraphicTypeSelection(midiInputs, renderer.graphicTypes, document.querySelector('.sidebar'))
+    getGraphicTypeSelection(midiInputs, graphicTypes, document.querySelector('.sidebar'))
 );
 
 const midi$ = Observable.merge(keyboard$, midiInputTriggers$);
@@ -40,30 +40,16 @@ const gameLoop$ = ticker$.combineLatest(midi$, graphicMapping$)
         , defaultGameState);
 
 
-const renderer = new Renderer(
-    defaultGameState,
-    document.querySelector('.fireplace')
-);
-
-
-// initial graphics flattened from initial game state
-// each graphic type is assigned an array of raw pixiJS graphic objects
-let graphics: { [key: string]: Array<Graphics> } = Object.keys(defaultGameState).reduce((obj, currentKey) => {
-    const current = {};
-    current[currentKey] = defaultGameState[currentKey].map((base: Base) => base.draw());
-    return Object.assign(obj, current);
-}, {});
-
+pixiApp.init(document.querySelector('.fireplace'), defaultGameState);
 
 // Gameloop
 gameLoop$
-    // TODO: combineLatest(graphics$)
     .subscribe((gameState: GameState) => {
-    graphics = renderer.render(gameState, graphics);
+        pixiApp.render(gameState);
 });
 
 // Keep a map of object indexes which are currently visible per graphic type, e.g. {lasers: {'C#5':0, 'D5':1}, ...}
-let activeObjectsPerGraphicType = renderer.graphicTypes.reduce(function (result, graphicType) {
+let activeObjectsPerGraphicType = graphicTypes.reduce(function (result, graphicType) {
     result[graphicType] = {};
     return result;
 }, {});
@@ -71,7 +57,7 @@ let activeObjectsPerGraphicType = renderer.graphicTypes.reduce(function (result,
 function mutateGameState(state: GameState, midiNotes: Array<MIDINote>, ticker: any, graphicMapping: Array<GraphicInputMapping>): GameState {
     if (midiNotes.length === 0) {
         // Initiate stop animation for all visible objects
-        renderer.graphicTypes.forEach(graphicType => {
+        graphicTypes.forEach(graphicType => {
             activeObjectsPerGraphicType[graphicType] = {};
             state[graphicType].filter(item => item.isVisible).forEach((item, index) => item.stop(index));
         });
@@ -79,7 +65,7 @@ function mutateGameState(state: GameState, midiNotes: Array<MIDINote>, ticker: a
     }
 
     // Loop through each type of graphic (lasers, triangles, ...)
-    renderer.graphicTypes.forEach(graphicType => {
+    graphicTypes.forEach(graphicType => {
         // Get the notes that are pressed for the input associated with this graphic (and a list of keys+octaves)
         const matchingInputs = graphicMapping.filter(g => g.graphicType === graphicType);
         const graphicNotes = intersectionBy(midiNotes, matchingInputs, 'inputId');
