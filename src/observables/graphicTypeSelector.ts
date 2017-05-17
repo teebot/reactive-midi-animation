@@ -1,7 +1,7 @@
 import MIDIInput = WebMidi.MIDIInput;
 import {Observable} from 'rxjs/Observable';
 import * as h from 'hyperscript';
-import {GraphicInputMapping} from './types/graphicInputMapping';
+import {GraphicInputMapping} from '../types/graphicInputMapping';
 
 /**
  * Adds input items to a sidebar to allow users to select types of graphics to use per input
