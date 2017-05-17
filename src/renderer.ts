@@ -1,4 +1,4 @@
-import {Graphics, Application} from 'pixi.js';
+import {Application} from 'pixi.js';
 import {GameState} from './types/gameState';
 
 /**
@@ -7,16 +7,12 @@ import {GameState} from './types/gameState';
  * properties to objects visible screen
  */
 export class Renderer {
-    defaultGameState: GameState;
     app: Application;
     graphicTypes: Array<string>;
     graphics: any; // Object where key is type, value = sets of graphics containing individual graphics
-    canvasDomContainer: HTMLCanvasElement;
 
-    constructor(defaultGameState, canvasDomContainer) {
+    constructor(private defaultGameState, private canvasDomContainer) {
         // Initialise PixiJS application
-        this.defaultGameState = defaultGameState;
-        this.canvasDomContainer = canvasDomContainer;
         this.app = new Application(800, 600, {backgroundColor: 0x000000});
         this.graphicTypes = ['lasers', 'triangles', 'boringBoxes'];
         this.graphics = []; // e.g. {'lasers': [[backLine, frontLine],[backLine,frontLine]]}
@@ -26,15 +22,15 @@ export class Renderer {
         this.init();
 
         // Add full screen handler
-        this.canvasDomContainer.querySelector('canvas').addEventListener('dblclick', this.fullscreenHandler);
+        this.canvasDomContainer.querySelector('canvas').addEventListener('dblclick', Renderer.fullscreenHandler);
     }
 
-    fullscreenHandler(): void {
-        const el = document.querySelector('canvas');
+    static fullscreenHandler(): void {
+        const el: Element = document.querySelector('canvas');
         if(el.webkitRequestFullScreen) {
             el.webkitRequestFullScreen();
         } else {
-            console.log('Full screen not supported')
+            console.log('Full screen not supported');
         }
     }
 

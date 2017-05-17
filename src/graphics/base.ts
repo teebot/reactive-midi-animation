@@ -1,12 +1,6 @@
 import Graphics = PIXI.Graphics;
 
 export abstract class Base {
-    x: number;
-    y: number;
-    opacity: number;
-    appearedAt: number;
-    sustain: boolean;
-    decayFor: number;
 
     // State
     isVisible: boolean;
@@ -22,19 +16,13 @@ export abstract class Base {
     animationType: string;
 
     constructor(
-        x: number,
-        y: number,
-        opacity: number,
-        appearedAt: number,
-        sustain: boolean,
-        decayFor: number
+        public x: number,
+        public y: number,
+        public opacity: number,
+        public appearedAt: number,
+        public sustain: boolean,
+        public decayFor: number
     ) {
-        this.x = x;
-        this.y  = y;
-        this.opacity = opacity;
-        this.appearedAt = appearedAt;
-        this.decayFor = decayFor;
-        this.sustain = sustain;
         this.isVisible = false;
         this.isKeyDown = false;
         this.isDecaying = false;
