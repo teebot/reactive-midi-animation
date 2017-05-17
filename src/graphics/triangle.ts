@@ -71,7 +71,7 @@ export class Triangle extends Base {
         return [triangle];
     }
 
-    applyStateToGraphics(gfxObjects: Array<Graphics>) {
+    applyStateToGraphics(gfxObjects: Array<Graphics>): void {
         gfxObjects[0].alpha = this.isVisible ? this.opacity : 0;
     }
 }

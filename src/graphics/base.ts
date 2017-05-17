@@ -49,7 +49,7 @@ export abstract class Base {
         return [];
     }
 
-    applyStateToGraphics(gfxObjects: Array<Graphics>) {
+    applyStateToGraphics(gfxObjects: Array<Graphics>): void {
         return;
     }
 }

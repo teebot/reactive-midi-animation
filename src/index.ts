@@ -12,6 +12,7 @@ import {Base} from './graphics/base';
 import {shuffle} from './utils/shuffle';
 import {intersectionBy} from 'lodash';
 import {GraphicInputMapping} from './types/graphicInputMapping';
+import {Graphics} from 'pixi.js';
 
 const TICKER_INTERVAL = 17;
 const ticker$ = Observable
@@ -38,14 +39,27 @@ const gameLoop$ = ticker$.combineLatest(midi$, graphicMapping$)
             mutateGameState(state, midiNotes, ticker, graphicMapping)
         , defaultGameState);
 
+
 const renderer = new Renderer(
     defaultGameState,
     document.querySelector('.fireplace')
 );
 
+
+// initial graphics flattened from initial game state
+// each graphic type is assigned an array of raw pixiJS graphic objects
+let graphics: { [key: string]: Array<Graphics> } = Object.keys(defaultGameState).reduce((obj, currentKey) => {
+    const current = {};
+    current[currentKey] = defaultGameState[currentKey].map((base: Base) => base.draw());
+    return Object.assign(obj, current);
+}, {});
+
+
 // Gameloop
-gameLoop$.subscribe((gameState: GameState) => {
-    renderer.render(gameState);
+gameLoop$
+    // TODO: combineLatest(graphics$)
+    .subscribe((gameState: GameState) => {
+    graphics = renderer.render(gameState, graphics);
 });
 
 // Keep a map of object indexes which are currently visible per graphic type, e.g. {lasers: {'C#5':0, 'D5':1}, ...}
