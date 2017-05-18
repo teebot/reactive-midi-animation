@@ -62,7 +62,7 @@ export class BoringBox extends Base {
         return [box];
     }
 
-    applyStateToGraphics(gfxObjects: Array<Graphics>) {
+    applyStateToGraphics(gfxObjects: Array<Graphics>): void {
         gfxObjects[0].alpha = this.isVisible ? this.opacity : 0;
         // Todo: Rotation + time = http://stackoverflow.com/questions/17505169/pixi-js-pivot-affects-object-position
     }

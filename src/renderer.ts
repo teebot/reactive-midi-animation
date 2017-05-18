@@ -1,61 +1,56 @@
 import {Application} from 'pixi.js';
 import {GameState} from './types/gameState';
+import Graphics = PIXI.Graphics;
+
+let graphicsByType: Map<string, Array<Array<Graphics>>>;
+const app = new Application(800, 600, {backgroundColor: 0x000000});
 
 /**
- * This class initialises all possible graphics based visible the default game state
- * And implements a render routine which will take the current game state and apply all
- * properties to objects visible screen
+ * initialises all possible graphics based visible the default game state
+ * @param canvasDomContainer
+ * @param defaultGameState
  */
-export class Renderer {
-    app: Application;
-    graphicTypes: Array<string>;
-    graphics: any; // Object where key is type, value = sets of graphics containing individual graphics
+const init = (canvasDomContainer: Element, defaultGameState: GameState): void => {
+    canvasDomContainer.appendChild(app.view);
+    canvasDomContainer.querySelector('canvas').addEventListener('dblclick', fullscreenHandler);
 
-    constructor(private defaultGameState, private canvasDomContainer) {
-        // Initialise PixiJS application
-        this.app = new Application(800, 600, {backgroundColor: 0x000000});
-        this.graphicTypes = ['lasers', 'triangles', 'boringBoxes'];
-        this.graphics = []; // e.g. {'lasers': [[backLine, frontLine],[backLine,frontLine]]}
+    // initial graphics flattened from initial game state
+    // each graphic type is assigned an array of raw pixiJS graphic objects
+    graphicsByType = Object.keys(defaultGameState).reduce((obj, currentKey) => {
+        obj.set(currentKey, defaultGameState[currentKey].map(current => current.draw()));
+        return obj;
+    }, new Map<string, Array<Array<Graphics>>>());
 
-        // Render canvas element and all graphics
-        this.canvasDomContainer.appendChild(this.app.view);
-        this.init();
-
-        // Add full screen handler
-        this.canvasDomContainer.querySelector('canvas').addEventListener('dblclick', Renderer.fullscreenHandler);
+    for (const graphicsGroup of graphicsByType.values()) {
+        graphicsGroup.forEach(gg => gg.forEach(g => app.stage.addChild(g)));
     }
+};
 
-    static fullscreenHandler(): void {
-        const el: Element = document.querySelector('canvas');
-        if(el.webkitRequestFullScreen) {
-            el.webkitRequestFullScreen();
-        } else {
-            console.log('Full screen not supported');
-        }
+const fullscreenHandler = (): void => {
+    const el: Element = document.querySelector('canvas');
+    if (el.webkitRequestFullScreen) {
+        el.webkitRequestFullScreen();
+    } else {
+        console.log('Full screen not supported');
     }
+};
 
-    /**
-     * Draw all objects on screen based on the default game state:
-     * Retrieve sets of objects, which consist of one or more items (e.g. lasers require back + front lines)
-     * Store sets per category (e.g. lasers) so we can address them to apply state changes (in the render function)
-     */
-    init(): void {
-        this.graphicTypes.forEach(graphicType => {
-            this.graphics[graphicType] = [];
-            this.defaultGameState[graphicType].forEach(item => {
-                let objects = item.draw();
-                this.graphics[graphicType].push(objects);
-                objects.forEach(graphic => this.app.stage.addChild(graphic));
-            });
-        });
-    }
-
-    render(gameState: GameState): void {
-        // Apply game state to all sets of graphics
-        Object.keys(this.graphics).forEach(graphicType => {
-            gameState[graphicType].forEach((item, index) => {
-                item.applyStateToGraphics(this.graphics[graphicType][index]);
-            });
+/**
+ * render routine which will take the current game state and apply all
+ * properties to objects visible screen
+ * @param gameState
+ */
+function render(gameState: GameState): void {
+    // Apply game state to all sets of graphics
+    for (const graphicKey of graphicsByType.keys()) {
+        const graphicsGroup = graphicsByType.get(graphicKey);
+        gameState[graphicKey].forEach((item, index) => {
+            item.applyStateToGraphics(graphicsGroup[index]);
         });
     }
 }
+
+export const pixiApp = {
+    render,
+    init
+};

@@ -33,7 +33,7 @@ export class Laser extends Base {
         this.animationType = Base.ANIMATION_TYPE_RANDOM;
     }
 
-    animate(objectIndex : number) {
+    animate(objectIndex : number): void {
         super.animate(objectIndex);
 
         // If we were decaying, come back to life
@@ -48,7 +48,7 @@ export class Laser extends Base {
         this.glow = glowLevel + 2;
     }
 
-    stop(objectIndex : number) {
+    stop(objectIndex : number): void {
         super.stop(objectIndex);
 
         // Decay animation
@@ -67,7 +67,7 @@ export class Laser extends Base {
         }
     }
 
-    draw() {
+    draw(): Array<Graphics> {
         const backLine = new Graphics();
         backLine.lineStyle(4, this.color, this.opacity);
         backLine.moveTo(this.x, this.y);
@@ -86,7 +86,7 @@ export class Laser extends Base {
         return [backLine, frontLine];
     }
 
-    applyStateToGraphics(gfxObjects: Array<Graphics>) {
+    applyStateToGraphics(gfxObjects: Array<Graphics>): void {
         gfxObjects[0].alpha = this.isVisible ? this.opacity : 0; // backLine
         gfxObjects[0].filters[0]["blur"] = this.glow; // backLine
         gfxObjects[1].alpha = this.isVisible ? this.opacity : 0; // frontLine
