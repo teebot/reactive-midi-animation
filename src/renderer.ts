@@ -1,9 +1,8 @@
 import {Application} from 'pixi.js';
 import {GameState} from './types/gameState';
 import Graphics = PIXI.Graphics;
-import {Base} from './graphics/base';
 
-let graphics: { [key: string]: Array<Graphics> };
+let graphicsByType: Map<string, Array<Array<Graphics>>>;
 const app = new Application(800, 600, {backgroundColor: 0x000000});
 
 /**
@@ -11,45 +10,44 @@ const app = new Application(800, 600, {backgroundColor: 0x000000});
  * @param canvasDomContainer
  * @param defaultGameState
  */
-function init(canvasDomContainer: Element, defaultGameState: GameState) {
+const init = (canvasDomContainer: Element, defaultGameState: GameState): void => {
     canvasDomContainer.appendChild(app.view);
     canvasDomContainer.querySelector('canvas').addEventListener('dblclick', fullscreenHandler);
 
     // initial graphics flattened from initial game state
     // each graphic type is assigned an array of raw pixiJS graphic objects
-    graphics = Object.keys(defaultGameState).reduce((obj, currentKey) => {
-        const current = {};
-        current[currentKey] = defaultGameState[currentKey].map((base: Base) => base.draw());
-        return Object.assign(obj, current);
-    }, {});
+    graphicsByType = Object.keys(defaultGameState).reduce((obj, currentKey) => {
+        obj.set(currentKey, defaultGameState[currentKey].map(current => current.draw()));
+        return obj;
+    }, new Map<string, Array<Array<Graphics>>>());
 
-    Object.keys(graphics).forEach(k => graphics[k].forEach(o =>
-        o.forEach(i => app.stage.addChild(i))
-    ));
-}
+    for (const graphicsGroup of graphicsByType.values()) {
+        graphicsGroup.forEach(gg => gg.forEach(g => app.stage.addChild(g)));
+    }
+};
 
-function fullscreenHandler(): void {
+const fullscreenHandler = (): void => {
     const el: Element = document.querySelector('canvas');
     if (el.webkitRequestFullScreen) {
         el.webkitRequestFullScreen();
     } else {
         console.log('Full screen not supported');
     }
-}
+};
 
 /**
  * render routine which will take the current game state and apply all
  * properties to objects visible screen
  * @param gameState
- * @returns {{[p: string]: Array<Graphics>}}
  */
 function render(gameState: GameState): void {
     // Apply game state to all sets of graphics
-    Object.keys(graphics).forEach(graphicType => {
-        gameState[graphicType].forEach((item, index) => {
-            item.applyStateToGraphics(graphics[graphicType][index]);
+    for (const graphicKey of graphicsByType.keys()) {
+        const graphicsGroup = graphicsByType.get(graphicKey);
+        gameState[graphicKey].forEach((item, index) => {
+            item.applyStateToGraphics(graphicsGroup[index]);
         });
-    });
+    }
 }
 
 export const pixiApp = {

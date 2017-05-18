@@ -1,0 +1,1 @@
+export type GraphicsNotes = {[graphicType: string]: {}};

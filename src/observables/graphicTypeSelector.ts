@@ -2,23 +2,24 @@ import MIDIInput = WebMidi.MIDIInput;
 import {Observable} from 'rxjs/Observable';
 import * as h from 'hyperscript';
 import {GraphicInputMapping} from '../types/graphicInputMapping';
+import {defaultGameState} from '../types/gameState';
+
+const GRAPHIC_TYPES = Object.keys(defaultGameState);
 
 /**
  * Adds input items to a sidebar to allow users to select types of graphics to use per input
  * For example: MIDI Input 1 = Triangles
  * For example: MIDI Input 1 = Triangles
  */
-export function getGraphicTypeSelection(midiInputs: Array<MIDIInput>,
-                                        graphicTypes: Array<string>,
-                                        sideBarElement: Element): Observable<Array<GraphicInputMapping>> {
+export function getGraphicTypeSelection(midiInputs: Array<MIDIInput>, sideBarElement: Element): Observable<Array<GraphicInputMapping>> {
 
     const initialMapping: Array<GraphicInputMapping> = [];
 
     const selectBoxes = midiInputs.map((midiInput, index) => {
-        const initialGraphicType = graphicTypes[index];
+        const initialGraphicType = GRAPHIC_TYPES[index];
         initialMapping.push({inputId: midiInput.id, graphicType: initialGraphicType});
 
-        const selectBox = renderSelectBox(midiInput, graphicTypes, initialGraphicType);
+        const selectBox = renderSelectBox(midiInput, GRAPHIC_TYPES, initialGraphicType);
         sideBarElement.appendChild(h('div.input', [h('div.title', midiInput.name), h('div.selector', selectBox)]));
         return selectBox;
     });
