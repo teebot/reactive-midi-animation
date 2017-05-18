@@ -5,6 +5,7 @@ import {keyboard$} from './observables/keyboard';
 import {midiInputs$, midiInputTriggers$} from './observables/midi';
 import {MIDINote} from './types/midiNote';
 import MIDIInput = WebMidi.MIDIInput;
+import '../node_modules/skeleton-css/css/skeleton.css';
 import './styles/index.css';
 import './styles/fire.css';
 import {getGraphicTypeSelection} from './observables/graphicTypeSelector';
