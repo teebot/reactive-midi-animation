@@ -4,6 +4,9 @@ import MIDIMessageEvent = WebMidi.MIDIMessageEvent;
 import {MIDINote} from '../types/midiNote';
 import {areNotesEqual, midiMessageMapper} from '../utils/midiMapper';
 import MIDIAccess = WebMidi.MIDIAccess;
+import {Subject} from 'rxjs/Subject';
+import MIDIOutput = WebMidi.MIDIOutput;
+import {GraphicInputMapping} from '../types/graphicInputMapping';
 
 const fakeKeyboardMIDIInput = {
     name: 'keyboard',
@@ -11,15 +14,24 @@ const fakeKeyboardMIDIInput = {
     onmidimessage: null
 };
 
+const midiAccess$ = Observable.fromPromise(navigator.requestMIDIAccess());
+
 /**
  * Emits all midi inputs available
  * @type Observable<Array<MIDIInput>>
  */
-export const midiInputs$ = Observable.fromPromise(navigator.requestMIDIAccess())
-    .map((midi: MIDIAccess) => {
-        const midiInputs = Array.from(midi.inputs).map(([id, input]) => input);
-        return [<MIDIInput>fakeKeyboardMIDIInput, ...midiInputs];
-    });
+export const midiInputs$ = midiAccess$.map((midi: MIDIAccess) => {
+    const midiInputs = Array.from(midi.inputs).map(([id, input]) => input);
+    return [<MIDIInput>fakeKeyboardMIDIInput, ...midiInputs];
+});
+
+/**
+ * Emits all midi outputs available
+ * @type Observable<Array<MIDIOutput>>
+ */
+export const midiOutput$ = midiAccess$.map((midi: MIDIAccess) => {
+    return Array.from(midi.outputs).map(([id, output]) => output);
+});
 
 /**
  * Emits whenever one of the MIDI instruments plays a note
@@ -49,3 +61,6 @@ export const midiInputTriggers$ = midiInputs$
     })
     .distinctUntilChanged()
     .startWith([]);
+
+
+export const midiOutSubject$ = new Subject<{midiNotes: Array<MIDINote>, graphicMapping: Array<GraphicInputMapping>}>();
