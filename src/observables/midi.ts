@@ -38,8 +38,7 @@ export const midiOutput$ = midiAccess$.map((midi: MIDIAccess) => {
  * Only pushed notes are emitted
  * @type Observable<Array<MIDINote>>
  */
-let pushedNotes: Array<MIDINote> = [];
-export const midiInputTriggers$ = midiInputs$
+export const midiInputTriggers$: Observable<Array<MIDINote>> = midiInputs$
     .flatMap(inputs =>
         Observable.create((observer) =>
             inputs.forEach(i =>
@@ -50,15 +49,13 @@ export const midiInputTriggers$ = midiInputs$
     .filter((midiMessage: MIDIMessageEvent) =>
         midiMessage.data[0] >= 128 && midiMessage.data[0] <= 159
     )
-    .map((midiMessage: MIDIMessageEvent) => {
+    .scan((pushedNotes: Array<MIDINote>, midiMessage: MIDIMessageEvent) => {
         const midiNote = midiMessageMapper(midiMessage);
         if (midiNote.onOff === 'on' && pushedNotes.indexOf(midiNote) === -1) {
-            pushedNotes = [midiNote, ...pushedNotes];
-        } else if (midiNote.onOff === 'off') {
-            pushedNotes = pushedNotes.filter(n => !areNotesEqual(n, midiNote));
+            return [midiNote, ...pushedNotes];
         }
-        return pushedNotes;
-    })
+        return pushedNotes.filter(n => !areNotesEqual(n, midiNote));
+    }, [])
     .distinctUntilChanged()
     .startWith([]);
 
