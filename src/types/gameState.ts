@@ -1,6 +1,7 @@
 import {Laser} from "../graphics/laser";
 import {BoringBox} from "../graphics/boringBox";
 import {Triangle} from "../graphics/triangle";
+import {RetroBackground} from "../graphics/retroBackground";
 
 /**
  * Constains current game state
@@ -8,7 +9,8 @@ import {Triangle} from "../graphics/triangle";
 export type GameState = {
     lasers: Array<Laser>,
     boringBoxes: Array<BoringBox>,
-    triangles: Array<Triangle>
+    triangles: Array<Triangle>,
+    background: Array<RetroBackground>
 };
 
 /**
@@ -31,6 +33,9 @@ export const defaultGameState: GameState = {
         new Triangle(1),
         new Triangle(2),
         new Triangle(3)
+    ],
+    background: [
+        new RetroBackground(0)
     ]
 };
 

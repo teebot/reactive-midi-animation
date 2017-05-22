@@ -53,7 +53,18 @@ export function mutateGameState(state: GameState, midiNotes: Array<MIDINote>, ti
     GRAPHIC_TYPES.forEach(graphicType => {
         // Get the notes that are pressed for the input associated with this graphic (and a list of keys+octaves)
         const matchingInputs = graphicMapping.filter(g => g.graphicType === graphicType);
-        const graphicNotes = intersectionBy(midiNotes, matchingInputs, 'inputId');
+
+        // TODO: Simplify the following with something like this... (it currently has a bug as it returns only 1 item)
+        // const graphicNotes = intersectionBy(midiNotes, matchingInputs, 'inputId');
+        let graphicNotes = [];
+        midiNotes.forEach(note => {
+            matchingInputs.forEach(input => {
+                if (note.inputId === input.inputId) {
+                    graphicNotes.push(note);
+                }
+            });
+        });
+
         const pressedNoteStrings = graphicNotes.map(midi => midi.note.key + midi.note.octave); // e.g. ['C#5', 'D#5']
 
         // Get the type of animation we are going to apply for this graphic (e.g. random, piano, stack)

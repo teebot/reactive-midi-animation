@@ -5,15 +5,6 @@ import Graphics = PIXI.Graphics;
 let graphicsByType: Map<string, Array<Array<Graphics>>>;
 const app = new Application(800, 600, {backgroundColor: 0x000000});
 
-const video = document.createElement('video');
-video.preload = 'auto';
-video.loop = true;
-video.src = require('./assets/retroscape.mp4');
-const texture = PIXI.Texture.fromVideo(video);
-const videoSprite = new PIXI.Sprite(texture);
-videoSprite.width = app.renderer.width;
-videoSprite.height = app.renderer.height;
-
 /**
  * initialises all possible graphics based visible the default game state
  * @param canvasDomContainer
@@ -22,9 +13,6 @@ videoSprite.height = app.renderer.height;
 const init = (canvasDomContainer: Element, defaultGameState: GameState): void => {
     canvasDomContainer.appendChild(app.view);
     canvasDomContainer.querySelector('canvas').addEventListener('dblclick', fullscreenHandler);
-
-
-    app.stage.addChild(videoSprite);
 
     // initial graphics flattened from initial game state
     // each graphic type is assigned an array of raw pixiJS graphic objects

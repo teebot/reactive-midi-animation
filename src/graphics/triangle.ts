@@ -7,10 +7,10 @@ export class Triangle extends Base {
     color: number;
 
     private static defaults = [
-        {x: 400, y: 310, width: 80, height: 80, color: 0x990000, opacity: 1, appearedAt: 0, decayFor: 1300, sustain: true},
-        {x: 400, y: 300, width: 100, height: 100, color: 0xAA0000, opacity: 1, appearedAt: 0, decayFor: 1200, sustain: true},
-        {x: 400, y: 290, width: 120, height: 120, color: 0xCC0000, opacity: 1, appearedAt: 0, decayFor: 1100, sustain: true},
-        {x: 400, y: 280, width: 140, height: 140, color: 0xFF0000, opacity: 1, appearedAt: 0, decayFor: 1000, sustain: true}
+        {x: 400, y: 310, width: 81, height: 80, color: 0x990000, opacity: 1, lastUpdatedAt: 0, decayFor: 1300, sustain: true},
+        {x: 400, y: 300, width: 100, height: 100, color: 0xAA0000, opacity: 1, lastUpdatedAt: 0, decayFor: 1200, sustain: true},
+        {x: 400, y: 290, width: 120, height: 120, color: 0xCC0000, opacity: 1, lastUpdatedAt: 0, decayFor: 1100, sustain: true},
+        {x: 400, y: 280, width: 140, height: 140, color: 0xFF0000, opacity: 1, lastUpdatedAt: 0, decayFor: 1000, sustain: true}
     ];
 
     constructor(objectIndex) {
@@ -18,7 +18,7 @@ export class Triangle extends Base {
             Triangle.defaults[objectIndex].x,
             Triangle.defaults[objectIndex].y,
             Triangle.defaults[objectIndex].opacity,
-            Triangle.defaults[objectIndex].appearedAt,
+            Triangle.defaults[objectIndex].lastUpdatedAt,
             Triangle.defaults[objectIndex].sustain,
             Triangle.defaults[objectIndex].decayFor
         );
@@ -34,7 +34,7 @@ export class Triangle extends Base {
         // If we were decaying, come back to life
         if (this.isDecaying) {
             this.isDecaying = false;
-            this.appearedAt = Date.now();
+            this.lastUpdatedAt = Date.now();
             this.opacity = Triangle.defaults[objectIndex].opacity;
         }
     }
@@ -43,16 +43,16 @@ export class Triangle extends Base {
         super.stop(objectIndex);
 
         // Decay animation
-        if (this.decayFor > 0 && this.isVisible && Date.now() <= this.appearedAt + this.decayFor) {
+        if (this.decayFor > 0 && this.isVisible && Date.now() <= this.lastUpdatedAt + this.decayFor) {
             this.isDecaying = true;
-            this.opacity = 1 - ((Date.now() - this.appearedAt) / this.decayFor);
+            this.opacity = 1 - ((Date.now() - this.lastUpdatedAt) / this.decayFor);
         }
 
         // Reset item values if no decay OR item has finished decaying
-        if (this.isVisible && (!this.decayFor || this.decayFor <= 0 || Date.now() > this.appearedAt + this.decayFor)) {
+        if (this.isVisible && (!this.decayFor || this.decayFor <= 0 || Date.now() > this.lastUpdatedAt + this.decayFor)) {
             this.opacity = Triangle.defaults[objectIndex].opacity;
             this.isVisible = false;
-            this.appearedAt = 0;
+            this.lastUpdatedAt = 0;
             this.isDecaying = false;
         }
     }
@@ -64,7 +64,8 @@ export class Triangle extends Base {
         triangle.drawPolygon([
             this.x, this.y - Math.round(this.height / 2),
             this.x + Math.round(this.width / 2), this.y + Math.round(this.height / 2),
-            this.x - Math.round(this.width / 2), this.y + Math.round(this.height / 2)
+            this.x - Math.round(this.width / 2), this.y + Math.round(this.height / 2),
+            this.x, this.y - Math.round(this.height / 2)
         ]);
         triangle.alpha = 0;
         triangle.endFill();
