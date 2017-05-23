@@ -2,8 +2,10 @@ import {Application} from 'pixi.js';
 import {GameState} from './types/gameState';
 import Graphics = PIXI.Graphics;
 
+const defaultSize = {width: 800, height: 600};
+
 let graphicsByType: Map<string, Array<Array<Graphics>>>;
-const app = new Application(800, 600, {backgroundColor: 0x000000});
+const app = new Application(defaultSize.width, defaultSize.height, {backgroundColor: 0x000000});
 
 /**
  * initialises all possible graphics based visible the default game state
@@ -13,6 +15,13 @@ const app = new Application(800, 600, {backgroundColor: 0x000000});
 const init = (canvasDomContainer: Element, defaultGameState: GameState): void => {
     canvasDomContainer.appendChild(app.view);
     canvasDomContainer.querySelector('canvas').addEventListener('dblclick', fullscreenHandler);
+    if (document.addEventListener)
+    {
+        document.addEventListener('webkitfullscreenchange', exitHandler, false);
+        document.addEventListener('mozfullscreenchange', exitHandler, false);
+        document.addEventListener('fullscreenchange', exitHandler, false);
+        document.addEventListener('MSFullscreenChange', exitHandler, false);
+    }
 
     // initial graphics flattened from initial game state
     // each graphic type is assigned an array of raw pixiJS graphic objects
@@ -31,8 +40,17 @@ const fullscreenHandler = (): void => {
     const el: Element = document.querySelector('canvas');
     if (el.webkitRequestFullScreen) {
         el.webkitRequestFullScreen();
+        el.className = 'full';
+        //app.renderer.resize(window.innerWidth, window.innerHeight);
     } else {
         console.log('Full screen not supported');
+    }
+};
+
+const exitHandler = (): void => {
+    if (!document.webkitIsFullScreen) {
+        const el: Element = document.querySelector('canvas');
+        el.className = '';
     }
 };
 
