@@ -20,7 +20,7 @@ export class BoringBox extends Base {
         );
         this.x2 = BoringBox.defaults[objectIndex].x2;
         this.y2 = BoringBox.defaults[objectIndex].y2;
-        this.animationType = Base.ANIMATION_TYPE_STACK;
+        this.animationType = Base.ANIMATION_TYPE_SOLO;
     }
 
     animate(objectIndex : number) {
