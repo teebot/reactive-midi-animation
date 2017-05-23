@@ -6,7 +6,7 @@ export class RetroBackground extends Base {
     height: number;
 
     private static defaults = [
-        {x: 0, y: 0, width: 800, height:600, opacity: 1, lastUpdatedAt: 0, decayFor: 1000, sustain: true}
+        {x: 0, y: 0, width: 800, height:600, opacity: 1, lastUpdatedAt: 0, decayFor: 400, sustain: true}
     ];
 
     constructor(objectIndex) {
@@ -25,8 +25,8 @@ export class RetroBackground extends Base {
 
     animate(objectIndex : number) {
         super.animate(objectIndex);
-        if ((this.lastUpdatedAt - this.appearedAt) < 1000) {
-            this.opacity = (this.lastUpdatedAt - this.appearedAt) / 1000; // 1000 = fade in time
+        if ((this.lastUpdatedAt - this.appearedAt) < this.decayFor) {
+            this.opacity = (this.lastUpdatedAt - this.appearedAt) / this.decayFor;
         } else {
             this.opacity = 1;
         }
