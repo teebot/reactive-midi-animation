@@ -9,12 +9,12 @@ export class Laser extends Base {
     glow: number;
 
     private static defaults = [
-        {x: -25, x2: 200, y: 0, y2: 600, color: 0xff0049, opacity: 1, appearedAt: 0, decayFor: 1000, glow: 2, sustain: true},
-        {x: 140, x2: 30, y: 0, y2: 600, color: 0x00ebb3, opacity: 1, appearedAt: 0, decayFor: 1000, glow: 2, sustain: true},
-        {x: 320, x2: 420, y: 0, y2: 600, color: 0x2befed, opacity: 1, appearedAt: 0, decayFor: 1000, glow: 2, sustain: true},
-        {x: 650, x2: 360, y: 0, y2: 600, color: 0xc8ff00, opacity: 1, appearedAt: 0, decayFor: 1000, glow: 2, sustain: true},
-        {x: 700, x2: 900, y: 0, y2: 600, color: 0xf6fc2d, opacity: 1, appearedAt: 0, decayFor: 1000, glow: 2, sustain: true},
-        {x: 920, x2: 600, y: 0, y2: 600, color: 0xff891f, opacity: 1, appearedAt: 0, decayFor: 1000, glow: 2, sustain: true}
+        {x: -25, x2: 200, y: 0, y2: 600, color: 0xff0049, opacity: 1, lastUpdatedAt: 0, decayFor: 1000, glow: 2, sustain: true},
+        {x: 140, x2: 30, y: 0, y2: 600, color: 0x00ebb3, opacity: 1, lastUpdatedAt: 0, decayFor: 1000, glow: 2, sustain: true},
+        {x: 320, x2: 420, y: 0, y2: 600, color: 0x2befed, opacity: 1, lastUpdatedAt: 0, decayFor: 1000, glow: 2, sustain: true},
+        {x: 650, x2: 360, y: 0, y2: 600, color: 0xc8ff00, opacity: 1, lastUpdatedAt: 0, decayFor: 1000, glow: 2, sustain: true},
+        {x: 700, x2: 900, y: 0, y2: 600, color: 0xf6fc2d, opacity: 1, lastUpdatedAt: 0, decayFor: 1000, glow: 2, sustain: true},
+        {x: 920, x2: 600, y: 0, y2: 600, color: 0xff891f, opacity: 1, lastUpdatedAt: 0, decayFor: 1000, glow: 2, sustain: true}
     ];
 
     constructor(objectIndex) {
@@ -22,7 +22,7 @@ export class Laser extends Base {
             Laser.defaults[objectIndex].x,
             Laser.defaults[objectIndex].y,
             Laser.defaults[objectIndex].opacity,
-            Laser.defaults[objectIndex].appearedAt,
+            Laser.defaults[objectIndex].lastUpdatedAt,
             Laser.defaults[objectIndex].sustain,
             Laser.defaults[objectIndex].decayFor
         );
@@ -39,7 +39,7 @@ export class Laser extends Base {
         // If we were decaying, come back to life
         if (this.isDecaying) {
             this.isDecaying = false;
-            this.appearedAt = Date.now();
+            this.lastUpdatedAt = Date.now();
             this.opacity = Laser.defaults[objectIndex].opacity;
         }
 
@@ -52,17 +52,17 @@ export class Laser extends Base {
         super.stop(objectIndex);
 
         // Decay animation
-        if (this.decayFor > 0 && this.isVisible && Date.now() <= this.appearedAt + this.decayFor) {
+        if (this.decayFor > 0 && this.isVisible && Date.now() <= this.lastUpdatedAt + this.decayFor) {
             this.isDecaying = true;
-            this.opacity = 1 - ((Date.now() - this.appearedAt) / this.decayFor);
+            this.opacity = 1 - ((Date.now() - this.lastUpdatedAt) / this.decayFor);
         }
 
         // Reset item values if no decay OR item has finished decaying
-        if (this.isVisible && (!this.decayFor || this.decayFor <= 0 || Date.now() > this.appearedAt + this.decayFor)) {
+        if (this.isVisible && (!this.decayFor || this.decayFor <= 0 || Date.now() > this.lastUpdatedAt + this.decayFor)) {
             this.glow = Laser.defaults[objectIndex].glow;
             this.opacity = Laser.defaults[objectIndex].opacity;
             this.isVisible = false;
-            this.appearedAt = 0;
+            this.lastUpdatedAt = 0;
             this.isDecaying = false;
         }
     }

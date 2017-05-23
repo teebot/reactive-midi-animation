@@ -1,4 +1,5 @@
 import Graphics = PIXI.Graphics;
+import Sprite = PIXI.Sprite;
 
 export abstract class Base {
 
@@ -14,12 +15,13 @@ export abstract class Base {
     static ANIMATION_TYPE_RANDOM = 'random'; // Animate any non-visible non-decaying object
     static ANIMATION_TYPE_SOLO = 'solo'; // Always trigger the same object (e.g. for a "kick" effect)
     animationType: string;
+    appearedAt: number;
 
     constructor(
         public x: number,
         public y: number,
         public opacity: number,
-        public appearedAt: number,
+        public lastUpdatedAt: number,
         public sustain: boolean,
         public decayFor: number
     ) {
@@ -27,25 +29,27 @@ export abstract class Base {
         this.isKeyDown = false;
         this.isDecaying = false;
         this.animationType = Base.ANIMATION_TYPE_RANDOM; // Default = random, unless overridden
+        this.appearedAt = 0;
     }
 
     animate(objectIndex : number) {
         this.isVisible = true;
         this.isKeyDown = true;
-
-        // Always set appeared at to the current time (TODO: maybe change the name?)
-        this.appearedAt = Date.now();
+        this.lastUpdatedAt = Date.now();
+        if (this.appearedAt === 0) {
+            this.appearedAt = Date.now();
+        }
         return;
     }
 
     stop(objectIndex : number) {
         // TODO: Sustain
         this.isKeyDown = false;
-
+        this.appearedAt = 0;
         return;
     }
 
-    draw() : Array<Graphics> {
+    draw() : Array<Graphics|Sprite> {
         return [];
     }
 

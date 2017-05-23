@@ -24,6 +24,7 @@ const init = (canvasDomContainer: Element, defaultGameState: GameState): void =>
     for (const graphicsGroup of graphicsByType.values()) {
         graphicsGroup.forEach(gg => gg.forEach(g => app.stage.addChild(g)));
     }
+
 };
 
 const fullscreenHandler = (): void => {

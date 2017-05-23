@@ -9,7 +9,8 @@ module.exports = {
     module: {
         rules: [
             { test: /\.tsx?$/, loader: 'ts-loader' },
-            { test: /\.css$/, use: [ 'style-loader', 'css-loader' ] }
+            { test: /\.css$/, use: [ 'style-loader', 'css-loader' ] },
+            { test: /\.mp4$/, use: [ 'file-loader' ] }
         ]
     }
 }

@@ -49,6 +49,7 @@ gameLoop$
     });
 
 // DMX Lights
+let time = 0;
 const MIDI_OUT_DEVICE = 'IAC Driver IAC Bus 4';
 midiOutSubject$
     .withLatestFrom(midiOutput$)
@@ -67,10 +68,19 @@ midiOutSubject$
         }
 
         if (notesToSend.length) {
-            output.send(DMX_CONSTANTS.BLINDER_ON);
+            time += 1;
+            console.log(time, notesToSend);
+
+            if (time % 2 === 0 ) {
+                output.send(DMX_CONSTANTS.BLINDER_LEFT_ON);
+            } else {
+                output.send(DMX_CONSTANTS.BLINDER_RIGHT_ON);
+            }
             output.send(DMX_CONSTANTS.BLACKOUT_OFF);
         } else {
-            output.send(DMX_CONSTANTS.BLINDER_OFF);
+            output.send(DMX_CONSTANTS.BLINDER_LEFT_OFF);
+            output.send(DMX_CONSTANTS.BLINDER_RIGHT_OFF);
             output.send(DMX_CONSTANTS.BLACKOUT_ON);
         }
+
     });

@@ -6,7 +6,7 @@ export class BoringBox extends Base {
     y2: number;
 
     private static defaults = [
-        {x: 200, x2: 600, y: 100, y2: 500, opacity: 1, appearedAt: 0, decayFor: 1000, sustain: true}
+        {x: 200, x2: 600, y: 100, y2: 500, opacity: 1, lastUpdatedAt: 0, decayFor: 1000, sustain: true}
     ];
 
     constructor(objectIndex) {
@@ -14,7 +14,7 @@ export class BoringBox extends Base {
             BoringBox.defaults[objectIndex].x,
             BoringBox.defaults[objectIndex].y,
             BoringBox.defaults[objectIndex].opacity,
-            BoringBox.defaults[objectIndex].appearedAt,
+            BoringBox.defaults[objectIndex].lastUpdatedAt,
             BoringBox.defaults[objectIndex].sustain,
             BoringBox.defaults[objectIndex].decayFor
         );
@@ -29,7 +29,7 @@ export class BoringBox extends Base {
         // If we were decaying, come back to life
         if (this.isDecaying) {
             this.isDecaying = false;
-            this.appearedAt = Date.now();
+            this.lastUpdatedAt = Date.now();
             this.opacity = BoringBox.defaults[objectIndex].opacity;
         }
     }
@@ -38,16 +38,16 @@ export class BoringBox extends Base {
         super.stop(objectIndex);
 
         // Decay animation
-        if (this.decayFor > 0 && this.isVisible && Date.now() <= this.appearedAt + this.decayFor) {
+        if (this.decayFor > 0 && this.isVisible && Date.now() <= this.lastUpdatedAt + this.decayFor) {
             this.isDecaying = true;
-            this.opacity = 1 - ((Date.now() - this.appearedAt) / this.decayFor);
+            this.opacity = 1 - ((Date.now() - this.lastUpdatedAt) / this.decayFor);
         }
 
         // Reset item values if no decay OR item has finished decaying
-        if (this.isVisible && (!this.decayFor || this.decayFor <= 0 || Date.now() > this.appearedAt + this.decayFor)) {
+        if (this.isVisible && (!this.decayFor || this.decayFor <= 0 || Date.now() > this.lastUpdatedAt + this.decayFor)) {
             this.opacity = BoringBox.defaults[objectIndex].opacity;
             this.isVisible = false;
-            this.appearedAt = 0;
+            this.lastUpdatedAt = 0;
             this.isDecaying = false;
         }
     }
