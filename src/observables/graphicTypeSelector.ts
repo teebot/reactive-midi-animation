@@ -7,6 +7,15 @@ import MIDIOutput = WebMidi.MIDIOutput;
 
 const GRAPHIC_TYPES = Object.keys(defaultGameState);
 
+let storedMapping: Array<GraphicInputMapping>;
+try {
+    storedMapping = JSON.parse(window.localStorage.getItem('mapping')) || [];
+}
+catch(e) {
+    storedMapping = [];
+    console.log('no stored mapping could be parsed');
+}
+
 /**
  * Adds input items to a sidebar to allow users to select types of graphics to use per input
  * For example: MIDI Input 1 = Triangles
@@ -19,7 +28,8 @@ export function getGraphicTypeSelection(midiInputs: Array<MIDIInput>, sideBarEle
     const checkBoxes: Array<HTMLInputElement> = [];
 
     midiInputs.forEach((midiInput, index) => {
-        const initialGraphicType = GRAPHIC_TYPES[index];
+        const stored = storedMapping.find(m => m.inputId === midiInput.id);
+        const initialGraphicType = stored ? stored.graphicType || GRAPHIC_TYPES[index] : GRAPHIC_TYPES[index];
         initialMapping.push({inputId: midiInput.id, graphicType: initialGraphicType});
 
         const checkBox = h('input', {type: 'checkbox', name: midiInput.id});
@@ -49,6 +59,9 @@ export function getGraphicTypeSelection(midiInputs: Array<MIDIInput>, sideBarEle
 
     // return all select values if one of them changes
     return Observable.merge(checkBoxes$, selectBoxes$)
+        .do(mapping => {
+            window.localStorage.setItem('mapping', JSON.stringify(mapping));
+        })
         .startWith(initialMapping);
 }
 
