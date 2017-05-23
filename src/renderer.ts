@@ -15,6 +15,13 @@ const app = new Application(defaultSize[0], defaultSize[1], {backgroundColor: 0x
 const init = (canvasDomContainer: Element, defaultGameState: GameState): void => {
     canvasDomContainer.appendChild(app.view);
     canvasDomContainer.querySelector('canvas').addEventListener('dblclick', fullscreenHandler);
+    if (document.addEventListener)
+    {
+        document.addEventListener('webkitfullscreenchange', exitHandler, false);
+        document.addEventListener('mozfullscreenchange', exitHandler, false);
+        document.addEventListener('fullscreenchange', exitHandler, false);
+        document.addEventListener('MSFullscreenChange', exitHandler, false);
+    }
 
     // initial graphics flattened from initial game state
     // each graphic type is assigned an array of raw pixiJS graphic objects
@@ -37,6 +44,13 @@ const fullscreenHandler = (): void => {
         //app.renderer.resize(window.innerWidth, window.innerHeight);
     } else {
         console.log('Full screen not supported');
+    }
+};
+
+const exitHandler = (): void => {
+    if (!document.webkitIsFullScreen) {
+        const el: Element = document.querySelector('canvas');
+        el.className = '';
     }
 };
 
