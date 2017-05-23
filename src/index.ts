@@ -42,6 +42,7 @@ const gameLoop$ = ticker$.combineLatest(midi$, graphicMapping$)
 
 // PixiApp
 pixiApp.init(document.querySelector('.fireplace'), defaultGameState);
+
 // Gameloop
 gameLoop$
     .subscribe((gameState: GameState) => {
